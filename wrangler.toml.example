@@ -1,0 +1,11 @@
+name = "almahata-api"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+WU_STATION_ID = "IMEDIN86"
+STATION_OFFLINE_AFTER_MINUTES = "15"
+STATION_LATITUDE = "PUT_STATION_LATITUDE_HERE"
+STATION_LONGITUDE = "PUT_STATION_LONGITUDE_HERE"
+
+# ضع WU_API_KEY كـ Secret عبر Cloudflare/Wrangler ولا تكتبه هنا.

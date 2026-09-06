@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6f2">
+  <meta name="color-scheme" content="light dark">
+  <title>المحطة · أبيار الماشي</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./styles.css?v=1.8.0">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-title" data-i18n="brandTitle">المحطة</div>
+        <div class="brand-subtitle" data-i18n="brandSubtitle">أبيار الماشي · المدينة المنورة</div>
+      </div>
+
+      <div class="topbar-actions">
+        <span id="stationBadge" class="status-pill is-waiting">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="stationStateText">جارٍ الاتصال</span>
+        </span>
+        <button id="menuButton" class="icon-button" type="button" aria-label="القائمة" aria-expanded="false">☰</button>
+      </div>
+
+      <div id="menuPanel" class="menu-panel" hidden>
+        <button id="refreshButton" class="menu-action" type="button">
+          <span data-i18n="refresh">تحديث الآن</span>
+          <span class="menu-action-icon" aria-hidden="true">↻</span>
+        </button>
+
+        <div class="menu-section">
+          <div class="menu-title" data-i18n="language">اللغة</div>
+          <div class="setting-list" role="group" aria-label="اللغة">
+            <button class="setting-option" type="button" data-setting="language" data-value="ar">
+              <span>العربية</span><span class="choice-box" aria-hidden="true">✓</span>
+            </button>
+            <button class="setting-option" type="button" data-setting="language" data-value="en">
+              <span>English</span><span class="choice-box" aria-hidden="true">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" data-i18n="appearance">المظهر</div>
+          <div class="setting-list" role="group" aria-label="المظهر">
+            <button class="setting-option" type="button" data-setting="theme" data-value="light">
+              <span data-i18n="light">فاتح</span><span class="choice-box" aria-hidden="true">✓</span>
+            </button>
+            <button class="setting-option" type="button" data-setting="theme" data-value="dark">
+              <span data-i18n="dark">داكن</span><span class="choice-box" aria-hidden="true">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" data-i18n="units">الوحدات</div>
+          <div class="setting-list" role="group" aria-label="الوحدات">
+            <button class="setting-option" type="button" data-setting="units" data-value="metric">
+              <span data-i18n="metric">متري</span><span class="choice-box" aria-hidden="true">✓</span>
+            </button>
+            <button class="setting-option" type="button" data-setting="units" data-value="imperial">
+              <span data-i18n="imperial">إنجليزي</span><span class="choice-box" aria-hidden="true">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" data-i18n="extraCharts">شارتات إضافية</div>
+          <div class="setting-list extra-chart-options">
+            <label class="menu-check"><span data-i18n="rainChart">المطر</span><input id="showRainChart" type="checkbox"></label>
+            <label class="menu-check"><span data-i18n="pressureChart">الضغط الجوي</span><input id="showPressureChart" type="checkbox"></label>
+          </div>
+        </div>
+
+        <div class="menu-note" data-i18n="menuNote">الطقس من Weather Underground · أوقات الصلاة حسب أم القرى</div>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="أقسام الموقع">
+      <button class="tab active" data-tab="current" type="button" data-i18n="currentTab">الحالية</button>
+      <button class="tab" data-tab="forecast" type="button" data-i18n="forecastTab">التوقعات</button>
+      <button class="tab" data-tab="history" type="button" data-i18n="historyTab">التاريخ</button>
+      <button class="tab" data-tab="prayer" type="button" data-i18n="prayerTab">أوقات الصلاة</button>
+    </nav>
+
+    <main>
+      <section id="panel-current" class="panel active" data-panel="current">
+        <div class="current-hero">
+          <div class="current-main">
+            <div id="conditionIcon" class="condition-icon" aria-hidden="true">☀️</div>
+            <div>
+              <div id="temperature" class="temperature">—</div>
+              <div id="conditionLabel" class="condition-label">—</div>
+            </div>
+          </div>
+
+          <div class="hero-details">
+            <div><span data-i18n="max">العظمى</span><strong id="dayMax">—</strong></div>
+            <div><span data-i18n="min">الصغرى</span><strong id="dayMin">—</strong></div>
+            <div><span data-i18n="feels">المحسوسة</span><strong id="feelsLike">—</strong></div>
+          </div>
+        </div>
+
+        <div class="station-line">
+          <div>
+            <span class="line-label" data-i18n="stationNow">المحطة الآن</span>
+            <strong id="stationName">أبيار الماشي · المدينة</strong>
+          </div>
+          <div id="observedAt" class="observed-at">آخر قراءة: —</div>
+        </div>
+
+        <div class="reading-list" aria-label="قراءات المحطة الحالية">
+          <div class="reading-row"><span data-i18n="humidity">الرطوبة</span><strong id="humidity">—</strong></div>
+          <div class="reading-row"><span data-i18n="windSpeed">سرعة الرياح</span><strong id="windSpeed">—</strong></div>
+          <div class="reading-row"><span data-i18n="windGust">هبّات الرياح</span><strong id="windGust">—</strong></div>
+          <div class="reading-row"><span data-i18n="windDirection">اتجاه الرياح</span><strong id="windDirection">—</strong></div>
+          <div class="reading-row"><span data-i18n="pressure">الضغط</span><strong id="pressure">—</strong></div>
+          <div class="reading-row"><span data-i18n="rainToday">مطر اليوم</span><strong id="rain">—</strong></div>
+          <div class="reading-row"><span data-i18n="dewPoint">نقطة الندى</span><strong id="dewPoint">—</strong></div>
+          <div class="reading-row"><span data-i18n="solar">الإشعاع الشمسي</span><strong id="solarRadiation">—</strong></div>
+          <div class="reading-row"><span data-i18n="uv">مؤشر UV</span><strong id="uv">—</strong></div>
+        </div>
+      </section>
+
+      <section id="panel-forecast" class="panel" data-panel="forecast" hidden>
+        <div class="section-head">
+          <div>
+            <span class="eyebrow" data-i18n="nearForecast">التوقعات القريبة</span>
+            <h1 data-i18n="fiveDays">خمسة أيام</h1>
+          </div>
+          <span class="section-source">WU</span>
+        </div>
+        <div id="forecastList" class="forecast-list">
+          <div class="loading-box" data-i18n="loadingForecast">جارٍ تحميل التوقعات…</div>
+        </div>
+      </section>
+
+      <section id="panel-history" class="panel" data-panel="history" hidden>
+        <div class="section-head">
+          <div>
+            <span id="historyScopeLabel" class="eyebrow" data-i18n="todayMovement">حركة اليوم</span>
+            <h1 id="historyDate">من بداية اليوم حتى الآن</h1>
+          </div>
+          <span class="section-source">WU</span>
+        </div>
+
+        <div class="history-period-switch" role="tablist" aria-label="نطاق التاريخ">
+          <button class="history-period-button active" data-history-period="day" type="button" data-i18n="historyDay">يومي</button>
+          <button class="history-period-button" data-history-period="month" type="button" data-i18n="historyMonth">شهري</button>
+          <button class="history-period-button" data-history-period="year" type="button" data-i18n="historyYear">سنوي</button>
+        </div>
+
+        <div id="historyMessage" class="loading-box" data-i18n="loadingHistory">جارٍ تحميل سجل اليوم…</div>
+
+        <div id="historyCharts" class="history-charts" hidden>
+          <article class="chart-card chart-temp">
+            <div class="chart-head"><strong data-i18n="temperatureChart">الحرارة</strong><span id="tempRange">—</span></div>
+            <div id="tempChart" class="chart-wrap" aria-label="حركة الحرارة خلال اليوم"></div>
+          </article>
+
+          <article class="chart-card chart-wind">
+            <div class="chart-head"><strong data-i18n="windChart">الرياح والهبات</strong><span id="windRange">—</span></div>
+            <div class="chart-legend" aria-hidden="true">
+              <span><i class="legend-line wind-line"></i><b data-i18n="windShort">الرياح</b></span>
+              <span><i class="legend-line gust-line"></i><b data-i18n="gustShort">الهبات</b></span>
+            </div>
+            <div id="windChart" class="chart-wrap" aria-label="حركة سرعة الرياح وهبات الرياح خلال اليوم"></div>
+          </article>
+
+          <article class="chart-card chart-humidity">
+            <div class="chart-head"><strong data-i18n="humidity">الرطوبة</strong><span id="humidityRange">—</span></div>
+            <div id="humidityChart" class="chart-wrap" aria-label="حركة الرطوبة خلال اليوم"></div>
+          </article>
+
+          <article id="rainChartCard" class="chart-card chart-rain extra-chart" hidden>
+            <div class="chart-head"><strong data-i18n="rainChart">المطر</strong><span id="rainRange">—</span></div>
+            <div id="rainChart" class="chart-wrap" aria-label="حركة المطر خلال اليوم"></div>
+          </article>
+
+          <article id="pressureChartCard" class="chart-card chart-pressure extra-chart" hidden>
+            <div class="chart-head"><strong data-i18n="pressureChart">الضغط الجوي</strong><span id="pressureRange">—</span></div>
+            <div id="pressureChart" class="chart-wrap" aria-label="حركة الضغط الجوي خلال اليوم"></div>
+          </article>
+        </div>
+
+        <div id="historyMonthCharts" class="history-charts" hidden>
+          <article class="chart-card chart-temp">
+            <div class="chart-head"><strong data-i18n="temperatureChart">الحرارة</strong><span id="monthTempRange">—</span></div>
+            <div class="chart-legend" aria-hidden="true">
+              <span><i class="legend-line temp-high-line"></i><b data-i18n="max">العظمى</b></span>
+              <span><i class="legend-line temp-low-line"></i><b data-i18n="min">الصغرى</b></span>
+            </div>
+            <div id="monthTempChart" class="chart-wrap" aria-label="العظمى والصغرى خلال الشهر"></div>
+          </article>
+
+          <article class="chart-card chart-rain">
+            <div class="chart-head"><strong data-i18n="rainChart">المطر</strong><span id="monthRainRange">—</span></div>
+            <div id="monthRainChart" class="chart-wrap" aria-label="المطر خلال الشهر"></div>
+          </article>
+        </div>
+
+        <div id="historyYearCharts" class="history-charts" hidden>
+          <article class="chart-card chart-year-summary">
+            <div class="chart-head"><strong data-i18n="yearSummaryChart">الحرارة والمطر</strong><span id="yearSummaryRange">—</span></div>
+            <div class="chart-legend year-legend" aria-hidden="true">
+              <span><i class="legend-bar rain-bar-key"></i><b data-i18n="rainChart">المطر</b></span>
+              <span><i class="legend-bar temp-high-key"></i><b data-i18n="max">العظمى</b></span>
+              <span><i class="legend-bar temp-low-key"></i><b data-i18n="min">الصغرى</b></span>
+            </div>
+            <div id="yearSummaryChart" class="chart-wrap year-chart-wrap" aria-label="ملخص الحرارة والمطر خلال السنة"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="panel-prayer" class="panel" data-panel="prayer" hidden>
+        <div class="section-head">
+          <div>
+            <span class="eyebrow" data-i18n="prayerTab">أوقات الصلاة</span>
+            <h1 id="prayerDate">أبيار الماشي</h1>
+          </div>
+          <span class="section-source" data-i18n="ummAlQura">أم القرى</span>
+        </div>
+
+        <div class="next-prayer-card">
+          <span data-i18n="nextPrayer">الصلاة القادمة</span>
+          <strong id="nextPrayerName">—</strong>
+          <b id="nextPrayerTime">—</b>
+        </div>
+
+        <div id="prayerList" class="prayer-list">
+          <div class="loading-box" data-i18n="loadingPrayer">جارٍ تحميل أوقات الصلاة…</div>
+        </div>
+        <div id="hijriDate" class="hijri-date"></div>
+      </section>
+    </main>
+
+    <footer class="footer"><span data-i18n="brandTitle">المحطة</span></footer>
+  </div>
+
+  <script src="./config.js?v=1.7.0"></script>
+  <script src="./app.js?v=1.8.0" defer></script>
+</body>
+</html>
