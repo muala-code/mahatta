@@ -3,4 +3,4 @@
  * عند استضافة الواجهة كموقع ثابت منفصل، ضع رابط Cloudflare Worker هنا، مثال:
  * window.STATION_API_BASE = "https://station-api.example.workers.dev";
  */
-window.STATION_API_BASE = "";
+window.STATION_API_BASE = "https://mahatta-api.muala99.workers.dev";
