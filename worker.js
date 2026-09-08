@@ -349,9 +349,10 @@ async function getJson(url) {
   } catch {}
 
   if (!r.ok) {
-    const e = new Error(`WU HTTP ${r.status}`);
-    e.status = r.status;
-    throw e;
+    throw Object.assign(
+      new Error(`WU HTTP ${r.status}`),
+      { status: r.status }
+    );
   }
 
   return data;
@@ -963,7 +964,11 @@ async function apiHistoryToday() {
       dewPoint: firstFinite(historyMetric(row, 'dewptAvg', 'dewpt', 'dewPoint'), pickDew(row))
     }))
     .filter(row => row.observedAt)
-    .sort((a, b) => new Date(a.observedAt) - new Date(b.observedAt));
+    .sort(
+      (a, b) =>
+        new Date(a.observedAt).getTime() -
+        new Date(b.observedAt).getTime()
+    );
 
   try {
     const current = await getJson(currentUrl());
@@ -1016,13 +1021,13 @@ function daysInMonth(year, month) {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-function dateKey(year, month, day) {
+function dateKeyParts(year, month, day) {
   return `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
 }
 
 async function loadDailyPeriod(year, month, endDay) {
-  const start = dateKey(year, month, 1);
-  const end = dateKey(year, month, endDay);
+  const start = dateKeyParts(year, month, 1);
+  const end = dateKeyParts(year, month, endDay);
   const data = await getJson(dailyRangeUrl(start, end));
   const prefix = `${year}-${String(month).padStart(2, '0')}-`;
   return historyRows(data)
@@ -1040,7 +1045,7 @@ async function correctCurrentDayDaily(points, now) {
   const low = finite(point.tempLow);
   if (high !== null && high !== 0 && low !== null && low !== 0) return points;
   try {
-    const hourly = await loadDayHourly(dateKey(now.year, now.month, now.day));
+    const hourly = await loadDayHourly(dateKeyParts(now.year, now.month, now.day));
     const fb = dayMinMax(hourly, iso);
     if ((low === null || low === 0) && fb.min !== null) point.tempLow = fb.min;
     if ((high === null || high === 0) && fb.max !== null) point.tempHigh = fb.max;
@@ -1222,6 +1227,7 @@ async function apiPrayer() {
   };
 }
 
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS',
@@ -1290,6 +1296,7 @@ export default {
     const url = new URL(request.url);
 
     try {
+
       if (url.pathname === '/api/weather') {
         // القراءة الحالية: نحو دقيقة واحدة.
         return cachedJson(request, ctx, 55, apiWeather);
@@ -1326,7 +1333,7 @@ export default {
         return jsonResponse({
           ok: true,
           service: 'Station Mobile API',
-          version: 'worker-1.7.0-dev',
+          version: 'mahatta-worker-1.9.0',
           stationId: STATION_ID,
           hasApiKey: Boolean(WU_API_KEY)
         });

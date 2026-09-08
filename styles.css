@@ -1,3 +1,4 @@
+/* ===== styles.css (consolidated for v1.9.0) ===== */
 [hidden] { display: none !important; }
 
 :root {
@@ -655,3 +656,1478 @@ html[dir="ltr"] .next-prayer-card b { direction: ltr; }
   }
 }
 
+/* ===== v1.9-phase1.css (consolidated for v1.9.0) ===== */
+/* AlMahatta v1.9 – Phase 1 UI refinements
+   This file intentionally overrides the existing stable styles without replacing them. */
+
+/* App-like touch behaviour: keep page vertical scrolling, prevent page pinch zoom inside panels.
+   A future interactive radar/map area can opt back into its own gestures with .weather-map. */
+.panel {
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
+}
+.chart-wrap {
+  position: relative;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.weather-map,
+.map-shell {
+  touch-action: none;
+}
+
+/* Arabic readability only – English sizing is intentionally unchanged. */
+html[lang="ar"] .status-pill,
+html[lang="ar"] .brand-subtitle,
+html[lang="ar"] .menu-action,
+html[lang="ar"] .menu-title,
+html[lang="ar"] .setting-option,
+html[lang="ar"] .menu-check,
+html[lang="ar"] .tab,
+html[lang="ar"] .line-label,
+html[lang="ar"] .eyebrow,
+html[lang="ar"] .observed-at,
+html[lang="ar"] .section-source,
+html[lang="ar"] .forecast-phrase,
+html[lang="ar"] .forecast-rain,
+html[lang="ar"] .chart-legend,
+html[lang="ar"] .hijri-date {
+  font-size: calc(1em + 1px);
+}
+html[lang="ar"] .reading-row span,
+html[lang="ar"] .chart-head strong,
+html[lang="ar"] .prayer-name,
+html[lang="ar"] .station-line strong,
+html[lang="ar"] .condition-label {
+  font-size: calc(1em + 1.5px);
+}
+html[lang="ar"] .chart-axis-text {
+  font-size: 8.7px;
+  font-weight: 600;
+}
+
+/* Current-temperature card: stronger hierarchy without increasing overall footprint much. */
+.current-hero {
+  padding-block: 16px 14px;
+}
+.current-main {
+  min-height: 88px;
+}
+.condition-label {
+  line-height: 1.45;
+  font-weight: 650;
+}
+.hero-details {
+  margin-top: 11px;
+  padding-top: 11px;
+}
+.hero-details > div {
+  gap: 4px;
+}
+html[lang="ar"] .hero-details span {
+  font-size: 12px;
+  font-weight: 650;
+}
+html[lang="ar"] .hero-details strong {
+  font-size: 15px;
+}
+
+/* Information buttons replace persistent source text in most sections. */
+.section-title-with-info,
+.line-title-with-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.info-button {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--accent);
+  font: 800 12px/1 "Segoe UI", Tahoma, sans-serif;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.info-button:active {
+  transform: scale(.96);
+  background: var(--surface-soft);
+}
+#panel-forecast .section-source,
+#panel-history .section-source {
+  display: none;
+}
+#panel-prayer .section-head .eyebrow {
+  display: none;
+}
+#panel-prayer .section-head {
+  align-items: center;
+}
+#panel-prayer #prayerDate {
+  margin: 0;
+}
+#panel-prayer .hijri-date {
+  min-height: 0;
+  padding: 3px 0 0;
+  text-align: start;
+  line-height: 1.5;
+}
+#panel-prayer .section-source {
+  max-width: 44%;
+  text-align: end;
+  line-height: 1.45;
+}
+
+/* Menu: source note is replaced by per-section info buttons. */
+.menu-note {
+  display: none !important;
+}
+.menu-panel .setting-option,
+.menu-check {
+  min-height: 34px;
+}
+.choice-box,
+.menu-check input {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+}
+.menu-check input:checked {
+  box-shadow: none;
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.2 6.5 11.2 12.8 4.9' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 14px 14px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Chart touch targets and tooltip. */
+.chart-touch-point {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 12;
+  pointer-events: all;
+  cursor: pointer;
+}
+.chart-dot[data-chart-tip],
+.chart-bar[data-chart-tip],
+.year-high-bar[data-chart-tip],
+.year-low-bar[data-chart-tip],
+.year-rain-bar[data-chart-tip] {
+  cursor: pointer;
+}
+.chart-tooltip {
+  position: fixed;
+  z-index: 80;
+  max-width: min(230px, calc(100vw - 24px));
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(20, 32, 26, .15);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  direction: rtl;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .12s ease, transform .12s ease;
+}
+.chart-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+html[dir="ltr"] .chart-tooltip {
+  direction: ltr;
+}
+
+/* Annual chart: readable without touch. */
+.year-value-label {
+  fill: var(--text);
+  font-size: 6.7px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.year-chart-wrap {
+  min-height: 162px;
+}
+
+/* Keep labels legible in dark mode. */
+html[data-theme="dark"] .year-value-label {
+  fill: #edf2ef;
+  stroke: #252d29;
+}
+
+@media (max-width: 380px) {
+  html[lang="ar"] .tab { font-size: 11.5px; }
+  .info-button { width: 19px; height: 19px; flex-basis: 19px; }
+  .year-value-label { font-size: 6.2px; }
+}
+
+/* ===== v1.9-phase1-1.css (consolidated for v1.9.0) ===== */
+/* AlMahatta v1.9 – Phase 1.1 + Radar
+   Corrective layer loaded after v1.9-phase1.css. It keeps the stable base layout intact. */
+
+/* 1) Undo the broad Arabic enlargement from Phase 1.
+   Base sizes are restored; only the user-selected text-size control adjusts secondary text. */
+html[lang="ar"] .status-pill { font-size: 11px; }
+html[lang="ar"] .brand-subtitle { font-size: 11px; }
+html[lang="ar"] .menu-action { font-size: 11px; }
+html[lang="ar"] .menu-title { font-size: 10px; }
+html[lang="ar"] .setting-option,
+html[lang="ar"] .menu-check { font-size: 10.5px; }
+html[lang="ar"] .tab { font-size: 11px; }
+html[lang="ar"] .line-label,
+html[lang="ar"] .eyebrow { font-size: 10px; }
+html[lang="ar"] .observed-at { font-size: 10px; }
+html[lang="ar"] .section-source { font-size: 10px; }
+html[lang="ar"] .forecast-phrase { font-size: 11px; }
+html[lang="ar"] .forecast-rain { font-size: 10px; }
+html[lang="ar"] .hijri-date { font-size: 11px; }
+html[lang="ar"] .reading-row span { font-size: 12px; }
+html[lang="ar"] .prayer-name { font-size: 13px; }
+html[lang="ar"] .station-line strong { font-size: 13px; }
+html[lang="ar"] .condition-label { font-size: 12px; }
+html[lang="ar"] .chart-axis-text { font-size: 7.5px; font-weight: 400; }
+
+/* Restore the current hero to its compact stable sizing.
+   The structural redesign of the hero remains independent of this corrective pass. */
+.current-hero { padding: 15px 18px 13px; }
+.current-main { min-height: 84px; }
+.condition-label { line-height: normal; font-weight: 400; }
+.hero-details { margin-top: 10px; padding-top: 10px; }
+.hero-details > div { gap: 3px; }
+html[lang="ar"] .hero-details span { font-size: 11px; font-weight: 400; }
+html[lang="ar"] .hero-details strong { font-size: 14px; }
+
+/* 2) User text-size setting. Large readings/headings stay fixed to protect portrait layout.
+   Only normal/secondary screen text changes, and the differences are deliberately small. */
+html { --mahatta-text-step: 0px; }
+html[data-text-size="small"] { --mahatta-text-step: -0.5px; }
+html[data-text-size="medium"] { --mahatta-text-step: 0px; }
+html[data-text-size="large"] { --mahatta-text-step: 1px; }
+
+html[lang="ar"] .brand-subtitle,
+html[lang="ar"] .status-pill,
+html[lang="ar"] .observed-at,
+html[lang="ar"] .line-label,
+html[lang="ar"] .eyebrow,
+html[lang="ar"] .section-source,
+html[lang="ar"] .hijri-date,
+html[lang="ar"] .radar-caption {
+  font-size: calc(11px + var(--mahatta-text-step));
+}
+html[lang="ar"] .observed-at,
+html[lang="ar"] .line-label,
+html[lang="ar"] .eyebrow,
+html[lang="ar"] .section-source {
+  font-size: calc(10px + var(--mahatta-text-step));
+}
+html[lang="ar"] .reading-row span {
+  font-size: calc(12px + var(--mahatta-text-step));
+}
+html[lang="ar"] .prayer-name {
+  font-size: calc(13px + var(--mahatta-text-step));
+}
+html[lang="ar"] .chart-axis-text {
+  font-size: calc(7.5px + var(--mahatta-text-step));
+}
+
+/* Explicitly keep crowded areas stable across text-size choices. */
+html[lang="ar"] .tab { font-size: 11px !important; }
+html[lang="ar"] .forecast-name { font-size: 13px !important; }
+html[lang="ar"] .forecast-phrase { font-size: 11px !important; }
+html[lang="ar"] .forecast-rain { font-size: 10px !important; }
+html[lang="ar"] .forecast-temps { font-size: 13px !important; }
+html[lang="ar"] .menu-panel .setting-option,
+html[lang="ar"] .menu-check { font-size: 10.5px !important; }
+html[lang="ar"] .menu-title { font-size: 10px !important; }
+html[lang="ar"] .menu-action { font-size: 11px !important; }
+
+/* 3) Menu controls: compact text; visible checkbox/radio square immediately before its label. */
+.menu-panel .setting-option,
+.menu-check {
+  justify-content: flex-start !important;
+  gap: 6px !important;
+}
+.menu-panel .setting-option .choice-box,
+.menu-check input {
+  order: -1;
+  border-color: color-mix(in srgb, var(--text) 72%, var(--line)) !important;
+}
+.choice-box,
+.menu-check input {
+  width: 17px !important;
+  height: 17px !important;
+  flex: 0 0 17px !important;
+}
+.menu-panel .setting-option.active .choice-box,
+.menu-check input:checked {
+  border-color: var(--accent) !important;
+}
+html[data-theme="dark"] .menu-panel .setting-option .choice-box,
+html[data-theme="dark"] .menu-check input {
+  border-color: color-mix(in srgb, var(--text) 70%, var(--line)) !important;
+}
+.text-size-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.text-size-options .setting-option { padding-inline: 3px; }
+
+/* 4) Data-source note: Excel-comment-like floating note, not a modal. */
+#sourceInfoDialog { display: none !important; }
+.source-hover-note {
+  position: fixed;
+  z-index: 95;
+  width: max-content;
+  max-width: min(250px, calc(100vw - 24px));
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--text) 28%, var(--line));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface) 97%, #fff9cf 3%);
+  color: var(--text);
+  box-shadow: 0 5px 16px rgba(20, 32, 26, .14);
+  font-size: 11px;
+  line-height: 1.65;
+  text-align: start;
+  pointer-events: auto;
+}
+.source-hover-note[hidden] { display: none !important; }
+.source-hover-note::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  inset-inline-start: 16px;
+  width: 10px;
+  height: 10px;
+  border-inline-start: 1px solid color-mix(in srgb, var(--text) 28%, var(--line));
+  border-top: 1px solid color-mix(in srgb, var(--text) 28%, var(--line));
+  background: inherit;
+  transform: rotate(45deg);
+}
+.source-hover-note.is-above::before {
+  top: auto;
+  bottom: -6px;
+  transform: rotate(225deg);
+}
+.info-button { cursor: help; }
+
+/* 5) Annual chart is display-only: labels are already permanently visible. */
+#yearSummaryChart rect.year-rain-bar,
+#yearSummaryChart rect.year-high-bar,
+#yearSummaryChart rect.year-low-bar {
+  pointer-events: none !important;
+  cursor: default !important;
+  outline: none !important;
+}
+#yearSummaryChart .year-value-label { pointer-events: none !important; }
+
+/* 6) Five tabs including radar. */
+.tabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  padding-inline: 9px;
+}
+.tab { min-width: 0; }
+
+/* 7) Radar/satellite-clouds tab. Windy is embedded directly; Worker/API stay unchanged. */
+.radar-panel .section-head { padding-bottom: 8px; }
+.radar-layer-switch {
+  width: fit-content;
+  display: inline-flex;
+  gap: 3px;
+  margin: 0 2px 10px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.radar-layer-button {
+  min-height: 31px;
+  padding: 5px 13px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.radar-layer-button.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 5px rgba(30, 51, 42, .07);
+}
+.weather-map {
+  position: relative;
+  width: 100%;
+  height: clamp(380px, 112vw, 520px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface-soft);
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+.weather-map iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--surface-soft);
+}
+.radar-caption {
+  padding: 8px 4px 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (orientation: landscape) and (min-width: 560px) {
+  .weather-map { height: clamp(300px, 52vw, 460px); }
+}
+@media (max-width: 360px) {
+  .tabs { padding-inline: 6px; gap: 2px; }
+  html[lang="ar"] .tab { font-size: 10.5px !important; }
+  .radar-layer-button { padding-inline: 10px; }
+}
+/* Phase 1.2 radar console + history typography correction */
+
+/* History chart headings are secondary labels: return them to compact scale.
+   They follow the Small / Medium / Large preference only by a very small step. */
+html[lang="ar"] .chart-head strong {
+  font-size: calc(11px + var(--mahatta-text-step, 0px)) !important;
+  font-weight: 700;
+  line-height: 1.35;
+}
+html[lang="ar"] .chart-head span {
+  font-size: calc(8.5px + var(--mahatta-text-step, 0px)) !important;
+}
+
+/* RainViewer is the native radar surface; Windy is loaded only if Clouds is selected. */
+.radar-native-map,
+.radar-cloud-frame {
+  width: 100%;
+  height: 100%;
+}
+.radar-native-map {
+  display: block;
+  direction: ltr;
+  background: var(--surface-soft);
+}
+.radar-cloud-frame[hidden],
+.radar-native-map[hidden] {
+  display: none !important;
+}
+.radar-map-message {
+  position: absolute;
+  z-index: 500;
+  inset-inline: 12px;
+  top: 12px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+}
+.radar-map-message.is-error { color: var(--danger); }
+.radar-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 3px 10px;
+  padding: 3px 4px 0;
+  color: var(--muted);
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+.radar-attribution { opacity: .92; }
+#radarFrameTime { direction: ltr; }
+
+/* Keep Leaflet controls compact on the mobile-first card. */
+.weather-map .leaflet-control-zoom a {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 17px;
+}
+.weather-map .leaflet-control-attribution {
+  max-width: 75%;
+  font-size: 7px;
+  line-height: 1.25;
+  white-space: normal;
+}
+.weather-map .leaflet-container {
+  font-family: inherit;
+  background: var(--surface-soft);
+}
+.station-map-marker {
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  margin-top: -6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+
+/* Phase 1.2 revised: menu typography stays fixed */
+html[data-text-size] .menu-panel .menu-title { font-size: 10px !important; }
+html[data-text-size] .menu-panel .menu-action { font-size: 11px !important; }
+html[data-text-size] .menu-panel .menu-check,
+html[data-text-size] .menu-panel .setting-option { font-size: 10.5px !important; }
+/* Phase 1.2 final: secondary-text size control
+   Small / Medium / Large affects secondary/light text only.
+   Tabs, forecast rows, menu typography, large readings and major headings stay fixed. */
+
+/* Neutralize the older broad Phase-1.1 step. */
+html[data-text-size="small"],
+html[data-text-size="medium"],
+html[data-text-size="large"] {
+  --mahatta-text-step: 0px;
+}
+
+html {
+  --mahatta-secondary-step: 0px;
+  --mahatta-micro-step: 0px;
+}
+html[data-text-size="small"] {
+  --mahatta-secondary-step: -0.5px;
+  --mahatta-micro-step: -0.25px;
+}
+html[data-text-size="medium"] {
+  --mahatta-secondary-step: 0px;
+  --mahatta-micro-step: 0px;
+}
+html[data-text-size="large"] {
+  --mahatta-secondary-step: 1.5px;
+  --mahatta-micro-step: 1px;
+}
+
+/* Light/secondary text that should visibly respond to the user's choice. */
+html[lang="ar"] .brand-subtitle,
+html[lang="ar"] .status-pill,
+html[lang="ar"] .hero-details span,
+html[lang="ar"] .hijri-date,
+html[lang="ar"] .radar-caption {
+  font-size: calc(11px + var(--mahatta-secondary-step)) !important;
+}
+html[lang="ar"] .condition-label,
+html[lang="ar"] .loading-box {
+  font-size: calc(12px + var(--mahatta-secondary-step)) !important;
+}
+html[lang="ar"] .observed-at,
+html[lang="ar"] .section-source,
+html[lang="ar"] .footer {
+  font-size: calc(10px + var(--mahatta-secondary-step)) !important;
+}
+html[lang="ar"] .reading-row span {
+  font-size: calc(12px + var(--mahatta-secondary-step)) !important;
+}
+html[lang="ar"] .prayer-name {
+  font-size: calc(13px + var(--mahatta-secondary-step)) !important;
+}
+
+/* Very small chart/radar annotations move by a smaller amount. */
+html[lang="ar"] .chart-axis-text {
+  font-size: calc(7.5px + var(--mahatta-micro-step)) !important;
+}
+html[lang="ar"] .chart-head span,
+html[lang="ar"] .radar-meta {
+  font-size: calc(8.5px + var(--mahatta-micro-step)) !important;
+}
+html[lang="ar"] .chart-legend {
+  font-size: calc(9px + var(--mahatta-micro-step)) !important;
+}
+
+/* Chart titles are compact secondary headings, but remain fixed to avoid crowding. */
+html[lang="ar"] .chart-head strong {
+  font-size: 11px !important;
+}
+
+/* Explicitly preserve crowded/navigation areas at their compact sizes. */
+html[lang="ar"] .tab { font-size: 11px !important; }
+html[lang="ar"] .forecast-name { font-size: 13px !important; }
+html[lang="ar"] .forecast-phrase { font-size: 11px !important; }
+html[lang="ar"] .forecast-rain { font-size: 10px !important; }
+html[lang="ar"] .forecast-temps { font-size: 13px !important; }
+html[data-text-size] .menu-panel .menu-title { font-size: 10px !important; }
+html[data-text-size] .menu-panel .menu-action { font-size: 11px !important; }
+html[data-text-size] .menu-panel .menu-check,
+html[data-text-size] .menu-panel .setting-option { font-size: 10.5px !important; }
+
+@media (max-width: 360px) {
+  html[lang="ar"] .tab { font-size: 10.5px !important; }
+}
+
+/* Phase 1.3: stacking, three radar views, and cross-language text sizing */
+
+/* Keep the menu and source note above Leaflet panes/controls. */
+.topbar {
+  z-index: 1200;
+}
+.menu-panel {
+  z-index: 1250 !important;
+}
+.source-hover-note {
+  z-index: 1300 !important;
+}
+.weather-map {
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* Text-size model:
+   Small = the compact/elegant base.
+   Medium/Large enlarge secondary body labels only.
+   Main and secondary headings/navigation stay fixed.
+   Applies equally to Arabic and English. */
+html[data-text-size="small"] {
+  --mahatta-text-step: 0px;
+  --mahatta-secondary-step: 0px;
+  --mahatta-micro-step: 0px;
+}
+html[data-text-size="medium"] {
+  --mahatta-text-step: 0px;
+  --mahatta-secondary-step: 1px;
+  --mahatta-micro-step: .5px;
+}
+html[data-text-size="large"] {
+  --mahatta-text-step: 0px;
+  --mahatta-secondary-step: 1.75px;
+  --mahatta-micro-step: 1px;
+}
+
+/* Fixed headings / navigation / compact menu. */
+html[data-text-size] .brand-title { font-size: 18px !important; }
+html[data-text-size] .brand-subtitle { font-size: 11px !important; }
+html[data-text-size] .status-pill { font-size: 11px !important; }
+html[data-text-size] .tab { font-size: 11px !important; }
+html[data-text-size] .line-label,
+html[data-text-size] .eyebrow { font-size: 10px !important; }
+html[data-text-size] .section-head h1 { font-size: 17px !important; }
+html[data-text-size] .station-line strong { font-size: 13px !important; }
+html[data-text-size] .chart-head strong { font-size: 11px !important; }
+html[data-text-size] .forecast-name { font-size: 13px !important; }
+html[data-text-size] .forecast-temps { font-size: 13px !important; }
+html[data-text-size] .hijri-date { font-size: 11px !important; }
+html[data-text-size] .menu-panel .menu-title { font-size: 10px !important; }
+html[data-text-size] .menu-panel .menu-action { font-size: 11px !important; }
+html[data-text-size] .menu-panel .menu-check,
+html[data-text-size] .menu-panel .setting-option { font-size: 10.5px !important; }
+
+/* Secondary/light text controlled by Small / Medium / Large. */
+html[data-text-size] .condition-label,
+html[data-text-size] .loading-box {
+  font-size: calc(12px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .hero-details span {
+  font-size: calc(11px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .observed-at,
+html[data-text-size] .section-source,
+html[data-text-size] .footer {
+  font-size: calc(10px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .reading-row span {
+  font-size: calc(12px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .prayer-name {
+  font-size: calc(13px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .forecast-phrase {
+  font-size: calc(11px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .forecast-rain,
+html[data-text-size] .radar-caption {
+  font-size: calc(10px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .chart-axis-text {
+  font-size: calc(7.5px + var(--mahatta-micro-step)) !important;
+}
+html[data-text-size] .chart-head span,
+html[data-text-size] .radar-meta {
+  font-size: calc(8.5px + var(--mahatta-micro-step)) !important;
+}
+html[data-text-size] .chart-legend {
+  font-size: calc(9px + var(--mahatta-micro-step)) !important;
+}
+
+/* Three compact radar subtabs. */
+.radar-layer-switch {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+.radar-layer-button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 4px;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: normal;
+}
+.radar-native-map,
+.radar-external-frame {
+  width: 100%;
+  height: 100%;
+}
+.radar-external-frame[hidden],
+.radar-native-map[hidden] {
+  display: none !important;
+}
+.radar-external-link {
+  display: block;
+  width: fit-content;
+  margin: 7px 4px 0;
+  color: var(--accent);
+  font-size: 9px;
+  text-decoration: none;
+}
+.radar-external-link[hidden] { display: none !important; }
+
+@media (max-width: 360px) {
+  html[data-text-size] .tab { font-size: 10.5px !important; }
+  .radar-layer-button { font-size: 9.5px; }
+}
+
+/* Phase 1.4: contained radar, WU imagery, fullscreen, final text sizing */
+
+/* Small is the intended compact design. Medium/Large enlarge secondary text
+   only. Main/sub headings and navigation stay fixed in both languages. */
+html[data-text-size="small"] {
+  --mahatta-secondary-step: 0px;
+  --mahatta-micro-step: 0px;
+}
+html[data-text-size="medium"] {
+  --mahatta-secondary-step: 1.25px;
+  --mahatta-micro-step: .65px;
+}
+html[data-text-size="large"] {
+  --mahatta-secondary-step: 2.25px;
+  --mahatta-micro-step: 1.15px;
+}
+
+/* Fixed hierarchy: these never participate in user text scaling. */
+html[data-text-size] .brand-title { font-size: 18px !important; }
+html[data-text-size] .brand-subtitle { font-size: 11px !important; }
+html[data-text-size] .status-pill { font-size: 11px !important; }
+html[data-text-size] .tab { font-size: 11px !important; }
+html[data-text-size] .line-label,
+html[data-text-size] .eyebrow { font-size: 10px !important; }
+html[data-text-size] .section-head h1 { font-size: 17px !important; }
+html[data-text-size] .section-title-with-info h1 { font-size: 17px !important; }
+html[data-text-size] .station-line strong { font-size: 13px !important; }
+html[data-text-size] .chart-head strong { font-size: 11px !important; }
+html[data-text-size] .forecast-name { font-size: 13px !important; }
+html[data-text-size] .forecast-temps { font-size: 13px !important; }
+html[data-text-size] .menu-panel .menu-title { font-size: 10px !important; }
+html[data-text-size] .menu-panel .menu-action { font-size: 11px !important; }
+html[data-text-size] .menu-panel .menu-check,
+html[data-text-size] .menu-panel .setting-option { font-size: 10.5px !important; }
+
+/* Secondary/light text responds in Arabic and English alike. */
+html[data-text-size] .condition-label,
+html[data-text-size] .loading-box {
+  font-size: calc(12px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .hero-details span,
+html[data-text-size] .hijri-date {
+  font-size: calc(11px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .observed-at,
+html[data-text-size] .section-source,
+html[data-text-size] .footer {
+  font-size: calc(10px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .reading-row span {
+  font-size: calc(12px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .prayer-name {
+  font-size: calc(13px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .forecast-phrase {
+  font-size: calc(11px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .forecast-rain,
+html[data-text-size] .radar-caption {
+  font-size: calc(10px + var(--mahatta-secondary-step)) !important;
+}
+html[data-text-size] .chart-axis-text {
+  font-size: calc(7.5px + var(--mahatta-micro-step)) !important;
+}
+html[data-text-size] .chart-head span,
+html[data-text-size] .radar-meta,
+html[data-text-size] .chart-legend {
+  font-size: calc(8.5px + var(--mahatta-micro-step)) !important;
+}
+
+/* Hard containment. Nothing from a weather source may spill outside the card. */
+.radar-panel,
+.radar-panel .section-head,
+.radar-layer-switch,
+.weather-map,
+.radar-native-map,
+.weather-map .leaflet-container {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.radar-panel { overflow: hidden; }
+.weather-map {
+  position: relative;
+  width: 100%;
+  height: clamp(360px, 108vw, 500px);
+  overflow: hidden !important;
+  contain: layout paint;
+  isolation: isolate;
+  border-radius: 18px;
+}
+.radar-native-map,
+.weather-map .leaflet-container {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+.weather-map .leaflet-pane,
+.weather-map .leaflet-control-container {
+  max-width: 100%;
+}
+.weather-map .leaflet-control-attribution {
+  max-width: min(78%, 280px);
+  overflow-wrap: anywhere;
+}
+
+/* Fullscreen is the only state allowed to leave the normal card size. */
+.radar-fullscreen-button {
+  position: absolute;
+  z-index: 900;
+  top: 10px;
+  inset-inline-end: 10px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text) 22%, var(--line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 5px rgba(24, 39, 32, .12);
+}
+.radar-fullscreen-button[hidden] { display: none !important; }
+.weather-map:fullscreen,
+.weather-map:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--surface);
+}
+.weather-map:fullscreen .radar-native-map,
+.weather-map:-webkit-full-screen .radar-native-map {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Three compact sub-tabs; no external iframe remains. */
+.radar-layer-switch {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+.radar-layer-button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 4px;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: normal;
+}
+.radar-external-frame,
+.radar-external-link { display: none !important; }
+
+/* Menu and source notes must remain above Leaflet. */
+.topbar { z-index: 1200; }
+.menu-panel { z-index: 1250 !important; }
+.source-hover-note { z-index: 1300 !important; }
+
+@media (orientation: landscape) and (min-width: 560px) {
+  .weather-map { height: clamp(300px, 50vw, 450px); }
+}
+@media (max-width: 360px) {
+  html[data-text-size] .tab { font-size: 10.5px !important; }
+  .radar-layer-button { font-size: 9.5px; }
+}
+
+
+/* Phase 1.5: Radar + Clouds + Wind; Windy is lazy-loaded only on demand. */
+.radar-windy-frame {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface);
+}
+.radar-windy-frame[hidden] { display: none !important; }
+.weather-map:fullscreen .radar-windy-frame,
+.weather-map:-webkit-full-screen .radar-windy-frame {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+/* Phase 1.6: compact radar footer + current hero side details */
+
+/* Main temperature card: the current reading/status remains the primary block.
+   Max / Min / Feels-like move to the opposite side as three compact rows. */
+.current-hero {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 13px 14px;
+}
+.current-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 104px;
+  padding-inline: 6px 12px;
+  justify-content: center;
+}
+.hero-details {
+  flex: 0 0 clamp(104px, 31%, 128px);
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  margin-top: 0;
+  padding: 0 0 0 11px;
+  border-top: 0;
+  border-inline-start: 1px solid var(--line);
+}
+html[dir="ltr"] .hero-details {
+  padding: 0 11px 0 0;
+}
+.hero-details > div {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+  text-align: start;
+}
+.hero-details > div + div {
+  border-right: 0;
+  border-top: 1px solid var(--line);
+}
+.hero-details span {
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.hero-details strong {
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1;
+  direction: ltr;
+  white-space: nowrap;
+}
+
+/* The only text below the radar map is the short station-centering note. */
+.radar-caption {
+  padding: 6px 3px 0;
+  font-size: 9px !important;
+  line-height: 1.4;
+  text-align: start;
+}
+.radar-meta { display: none !important; }
+html[data-text-size] .radar-caption {
+  font-size: calc(9px + var(--mahatta-micro-step)) !important;
+}
+
+@media (max-width: 360px) {
+  .current-hero { padding-inline: 11px; }
+  .current-main { padding-inline: 3px 9px; }
+  .hero-details { flex-basis: 101px; padding-left: 8px; }
+  html[dir="ltr"] .hero-details { padding-right: 8px; padding-left: 0; }
+  .hero-details > div { gap: 5px; }
+  .hero-details strong { font-size: 13px; }
+}
+
+
+/* Phase 1.7: balanced current hero */
+/* Give the three secondary temperatures more breathing room, while making
+   the live reading slightly calmer and visually centered. */
+.current-hero {
+  gap: 9px;
+  padding: 11px 12px;
+}
+
+.current-main {
+  flex: 1 1 62%;
+  min-height: 100px;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(47, 110, 94, .060) 0%, rgba(255, 255, 255, .56) 100%);
+}
+
+.current-main > div:not(.condition-icon) {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-width: 0;
+}
+
+.current-main .temperature {
+  font-size: clamp(42px, 12vw, 54px);
+  line-height: .98;
+  letter-spacing: -1.5px;
+  text-align: center;
+}
+
+.current-main .condition-label {
+  margin-top: 7px;
+  font-size: 11px;
+  text-align: center;
+}
+
+.current-main .condition-icon {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  line-height: 1;
+  margin: 0;
+}
+
+.hero-details {
+  flex: 0 0 clamp(126px, 38%, 154px);
+  padding-inline: 12px;
+  border-inline-start: 1px solid var(--line);
+}
+
+html[dir="ltr"] .hero-details {
+  padding-inline: 12px;
+}
+
+.hero-details > div {
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.hero-details span {
+  font-size: 10.5px;
+}
+
+.hero-details strong {
+  font-size: 13.5px;
+}
+
+html[data-theme="dark"] .current-main {
+  background: linear-gradient(145deg, rgba(92, 143, 124, .12) 0%, rgba(255, 255, 255, .025) 100%);
+}
+
+@media (max-width: 360px) {
+  .current-hero {
+    gap: 7px;
+    padding-inline: 9px;
+  }
+  .current-main {
+    flex-basis: 58%;
+    gap: 7px;
+    padding-inline: 7px;
+  }
+  .current-main .temperature {
+    font-size: clamp(40px, 12vw, 49px);
+  }
+  .current-main .condition-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    font-size: 31px;
+  }
+  .hero-details {
+    flex-basis: 42%;
+    padding-inline: 10px;
+  }
+  .hero-details > div { gap: 7px; }
+  .hero-details span { font-size: 10px; }
+  .hero-details strong { font-size: 12.5px; }
+}
+
+
+/* Phase 1.8: fullscreen control is guaranteed on RainViewer radar as well as Windy. */
+.radar-fullscreen-button {
+  z-index: 1100;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* Fallback for browsers/webviews that do not expose Element.requestFullscreen. */
+.weather-map.is-pseudo-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--surface);
+  contain: layout paint;
+}
+.weather-map.is-pseudo-fullscreen .radar-native-map,
+.weather-map.is-pseudo-fullscreen .radar-windy-frame,
+.weather-map.is-pseudo-fullscreen .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+.weather-map.is-pseudo-fullscreen .radar-fullscreen-button {
+  top: max(12px, env(safe-area-inset-top));
+  inset-inline-end: max(12px, env(safe-area-inset-right));
+}
+body.radar-pseudo-fullscreen {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+
+/* Phase 1.9: exact half-and-half current temperature card */
+.current-hero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 11px 13px !important;
+}
+
+.current-main {
+  min-width: 0 !important;
+  min-height: 112px !important;
+  padding: 10px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(47, 110, 94, .055) 0%, rgba(255,255,255,.50) 100%) !important;
+}
+
+.current-main > div:not(.condition-icon) {
+  min-width: 0 !important;
+  display: grid !important;
+  justify-items: center !important;
+  align-content: center !important;
+}
+
+.current-main .temperature {
+  font-size: clamp(42px, 11.5vw, 52px) !important;
+  line-height: .98 !important;
+  letter-spacing: -1.4px !important;
+  text-align: center !important;
+}
+
+.current-main .condition-label {
+  margin-top: 7px !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+}
+
+.current-main .condition-icon {
+  flex: 0 0 43px !important;
+  width: 43px !important;
+  height: 43px !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 32px !important;
+  line-height: 1 !important;
+  align-self: center !important;
+}
+
+.hero-details {
+  min-width: 0 !important;
+  width: auto !important;
+  flex: none !important;
+  margin: 0 !important;
+  padding: 3px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: stretch !important;
+  border-top: 0 !important;
+  border-inline-start: 1px solid var(--line) !important;
+}
+
+.hero-details > div {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  padding: 6px 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  text-align: start !important;
+}
+
+.hero-details > div + div {
+  border-right: 0 !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+.hero-details span {
+  font-size: 10.5px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+}
+
+.hero-details strong {
+  flex: 0 0 auto !important;
+  font-size: 13.5px !important;
+  line-height: 1 !important;
+  direction: ltr !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] .current-main {
+  background: linear-gradient(145deg, rgba(92,143,124,.12) 0%, rgba(255,255,255,.025) 100%) !important;
+}
+
+@media (max-width: 360px) {
+  .current-hero { padding-inline: 9px !important; }
+  .current-main {
+    min-height: 106px !important;
+    padding-inline: 9px !important;
+    gap: 7px !important;
+  }
+  .current-main .temperature { font-size: clamp(39px, 11.8vw, 47px) !important; }
+  .current-main .condition-icon {
+    flex-basis: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 29px !important;
+  }
+  .hero-details { padding-inline: 12px !important; }
+  .hero-details > div { gap: 8px !important; padding-inline: 1px !important; }
+  .hero-details span { font-size: 10px !important; }
+  .hero-details strong { font-size: 12.5px !important; }
+}
+
+/* ===== final inline polish consolidated from index.html ===== */
+/* Phase 1.10 — hard 50/50 hero split. Kept inline intentionally so the final
+   card geometry cannot be masked by an older cached stylesheet. */
+.current-hero {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 11px 13px !important;
+}
+.current-hero > .current-main,
+.current-hero > .hero-details {
+  flex: 0 0 50% !important;
+  width: 50% !important;
+  max-width: 50% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.current-hero > .current-main {
+  min-height: 112px !important;
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(47,110,94,.055), rgba(255,255,255,.50)) !important;
+}
+.current-hero > .current-main > div:not(.condition-icon) {
+  min-width: 0 !important;
+  display: grid !important;
+  justify-items: center !important;
+  align-content: center !important;
+}
+.current-hero > .current-main .temperature {
+  font-size: clamp(40px, 11vw, 50px) !important;
+  line-height: .98 !important;
+  letter-spacing: -1.2px !important;
+  text-align: center !important;
+}
+.current-hero > .current-main .condition-label {
+  margin-top: 7px !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+}
+.current-hero > .current-main .condition-icon {
+  flex: 0 0 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+  align-self: center !important;
+}
+.current-hero > .hero-details {
+  margin: 0 !important;
+  padding: 4px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: stretch !important;
+  border-top: 0 !important;
+  border-inline-start: 1px solid var(--line) !important;
+  background: transparent !important;
+}
+.current-hero > .hero-details > div {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  padding: 7px 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  text-align: start !important;
+  box-sizing: border-box !important;
+}
+.current-hero > .hero-details > div + div {
+  border-right: 0 !important;
+  border-top: 1px solid var(--line) !important;
+}
+.current-hero > .hero-details span {
+  font-size: 10.5px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+}
+.current-hero > .hero-details strong {
+  flex: 0 0 auto !important;
+  font-size: 13.5px !important;
+  line-height: 1 !important;
+  direction: ltr !important;
+  white-space: nowrap !important;
+}
+html[data-theme="dark"] .current-hero > .current-main {
+  background: linear-gradient(145deg, rgba(92,143,124,.12), rgba(255,255,255,.025)) !important;
+}
+@media (max-width: 390px) {
+  .current-hero { padding-inline: 9px !important; }
+  .current-hero > .current-main {
+    min-height: 108px !important;
+    padding-inline: 8px !important;
+    gap: 6px !important;
+  }
+  .current-hero > .current-main .temperature {
+    font-size: clamp(38px, 10.8vw, 46px) !important;
+  }
+  .current-hero > .current-main .condition-icon {
+    flex-basis: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 28px !important;
+  }
+  .current-hero > .hero-details { padding-inline: 10px !important; }
+  .current-hero > .hero-details > div {
+    padding-inline: 4px !important;
+    gap: 7px !important;
+  }
+  .current-hero > .hero-details span { font-size: 9.8px !important; }
+  .current-hero > .hero-details strong { font-size: 12.5px !important; }
+}
+
+/* Phase 1.11 — keep our fullscreen button physically at top-right.
+   Leaflet zoom remains top-left in both RTL and LTR. */
+#weatherMap > #radarFullscreenButton,
+.weather-map > .radar-fullscreen-button {
+  right: 10px !important;
+  left: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+}
+.weather-map:fullscreen > .radar-fullscreen-button,
+.weather-map:-webkit-full-screen > .radar-fullscreen-button,
+.weather-map.is-pseudo-fullscreen > .radar-fullscreen-button {
+  right: max(12px, env(safe-area-inset-right)) !important;
+  left: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+}
+
+/* Phase 1.12 — keep RainViewer and Windy controls in their natural clear corners. */
+#weatherMap.is-windy-layer > #radarFullscreenButton,
+.weather-map.is-windy-layer > .radar-fullscreen-button {
+  left: 10px !important;
+  right: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+}
+#weatherMap.is-windy-layer:fullscreen > #radarFullscreenButton,
+#weatherMap.is-windy-layer:-webkit-full-screen > #radarFullscreenButton,
+#weatherMap.is-windy-layer.is-pseudo-fullscreen > #radarFullscreenButton,
+.weather-map.is-windy-layer:fullscreen > .radar-fullscreen-button,
+.weather-map.is-windy-layer:-webkit-full-screen > .radar-fullscreen-button,
+.weather-map.is-windy-layer.is-pseudo-fullscreen > .radar-fullscreen-button {
+  left: max(12px, env(safe-area-inset-left)) !important;
+  right: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+}
+
+/* Connection state is communicated by the dot; keep the label readable and fixed. */
+.status-pill,
+.status-pill.is-online,
+.status-pill.is-offline,
+.status-pill.is-waiting {
+  color: var(--text) !important;
+}
+.status-pill .status-dot { opacity: 1 !important; }
+.status-pill.is-online .status-dot { background: #2d8b6f !important; }
+.status-pill.is-offline .status-dot { background: var(--danger) !important; }
+.status-pill.is-waiting .status-dot { background: #9aa7a1 !important; }
+
+/* Phase 1.13 fallback: Windy fullscreen control belongs physically top-left. */
+#weatherMap.is-windy-layer > #radarFullscreenButton {
+  left: 10px !important;
+  right: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+}

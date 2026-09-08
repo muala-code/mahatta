@@ -47,7 +47,7 @@
       loadingHistory: "جارٍ تحميل سجل اليوم…", loadingMonthHistory: "جارٍ تحميل سجل الشهر…", loadingYearHistory: "جارٍ تحميل سجل السنة…", temperatureChart: "الحرارة",
       windChart: "الرياح والهبات", windShort: "الرياح", gustShort: "الهبات", ummAlQura: "أم القرى",
       nextPrayer: "الصلاة القادمة", loadingPrayer: "جارٍ تحميل أوقات الصلاة…",
-      waiting: "جارٍ الاتصال", online: "متصلة", offline: "غير متصلة", lastReading: "آخر قراءة",
+      waiting: "جارٍ الاتصال", online: "متصلة", offline: "غير متصلة", lastReading: "أحدث قراءة",
       fromMidnight: "من 00:00 حتى الآن", noData: "لا توجد بيانات يومية كافية حتى الآن.",
       today: "اليوم", tomorrow: "غدًا", rainChance: "فرصة المطر", hijri: "التاريخ الهجري",
       historyUnavailable: "تعذر تحميل حركة اليوم حاليًا.", longHistoryUnavailable: "تعذر تحميل بيانات هذه الفترة حاليًا.", periodNoData: "لا توجد بيانات كافية لهذه الفترة.", forecastUnavailable: "تعذر تحميل التوقعات حاليًا.",
@@ -650,19 +650,46 @@
     message.hidden = true; charts.hidden = false;
   }
 
+  function riyadhCalendarParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Riyadh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(date);
+    const read = type => Number(parts.find(part => part.type === type)?.value);
+    return { year: read("year"), month: read("month"), day: read("day") };
+  }
+
+  function reconcileCurrentMonthDay(points, data, period) {
+    if (period !== "month" || !Array.isArray(points) || !cache.current) return points;
+    const today = riyadhCalendarParts();
+    if (Number(data?.year) !== today.year || Number(data?.month) !== today.month) return points;
+
+    const row = points.find(point => Number(point?.day) === today.day);
+    if (!row) return points;
+
+    const currentLow = finiteNumber(cache.current.dayMin);
+    const currentHigh = finiteNumber(cache.current.dayMax);
+    if (currentLow !== null) row.tempLow = convert("temp", currentLow);
+    if (currentHigh !== null) row.tempHigh = convert("temp", currentHigh);
+    return points;
+  }
+
   function displayLongHistoryPoints(data, period) {
     const rainAllowed = point => {
       const year = Number(data?.year);
       const month = period === "year" ? Number(point?.month) : Number(data?.month);
       return year > 2026 || (year === 2026 && month >= 7);
     };
-    return (data.points || []).map(point => ({
+    const points = (data.points || []).map(point => ({
       ...point,
       label: period === "year" ? monthShort(point.month) : String(point.day ?? ""),
       tempHigh: convert("temp", point.tempHigh),
       tempLow: convert("temp", point.tempLow),
       rain: rainAllowed(point) ? Math.max(0, convert("rain", point.rain) ?? 0) : 0
     }));
+    return reconcileCurrentMonthDay(points, data, period);
   }
 
   function renderLongHistory(data, period) {
@@ -769,7 +796,7 @@
     }
   }
 
-  const loaders = { current: loadCurrent, forecast: loadForecast, history: loadHistory, prayer: loadPrayer };
+  const loaders = { current: loadCurrent, forecast: loadForecast, history: loadHistory, prayer: loadPrayer, radar: async () => { document.dispatchEvent(new CustomEvent("mahatta:radar-open")); }};
 
   function activateTab(name) {
     const target = loaders[name] ? name : "current";
@@ -826,20 +853,31 @@
 
   tabs.forEach(tab => tab.addEventListener("click", () => activateTab(tab.dataset.tab)));
 
-  // سحب أفقي بين التبويبات، مع حماية من التمرير الرأسي واللمسات القصيرة.
-  const tabOrder = ["current", "forecast", "history", "prayer"];
-  let touchStartX = 0, touchStartY = 0, touchStarted = false;
+  // سحب أفقي متعمد بين التبويبات. داخل الشارت يحتاج حركة واضحة، لكنه لا يُعطل بالكامل.
+  const tabOrder = ["current", "forecast", "history", "radar", "prayer"];
+  let touchStartX = 0, touchStartY = 0, touchStarted = false, touchStartedInChart = false;
   document.addEventListener("touchstart", event => {
     if (event.touches.length !== 1) return;
-    if (event.target.closest("button, a, input, textarea, select, .menu-panel")) { touchStarted = false; return; }
-    touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY; touchStarted = true;
+    if (event.target.closest("button, a, input, textarea, select, .menu-panel, .weather-map, .map-shell")) {
+      touchStarted = false;
+      touchStartedInChart = false;
+      return;
+    }
+    touchStartedInChart = !!event.target.closest(".chart-wrap");
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+    touchStarted = true;
   }, { passive: true });
   document.addEventListener("touchend", event => {
     if (!touchStarted || event.changedTouches.length !== 1) return;
     touchStarted = false;
+    const wasChart = touchStartedInChart;
+    touchStartedInChart = false;
     const dx = event.changedTouches[0].clientX - touchStartX;
     const dy = event.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    const minDistance = wasChart ? 85 : 75;
+    const horizontalRatio = wasChart ? 1.35 : 1.4;
+    if (Math.abs(dx) < minDistance || Math.abs(dx) < Math.abs(dy) * horizontalRatio) return;
     const active = document.querySelector(".tab.active")?.dataset.tab || "current";
     const index = tabOrder.indexOf(active);
     const nextIndex = dx < 0 ? index + 1 : index - 1;

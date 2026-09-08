@@ -774,8 +774,10 @@ def api_prayer():
     }
 
 
+
+
 class Handler(SimpleHTTPRequestHandler):
-    server_version = "AlMahattaLocal/1.8-dev"
+    server_version = "AlMahattaLocal/1.9.0"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -796,6 +798,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
+
     def do_HEAD(self):
         path = urlparse(self.path).path
         if path == "/favicon.ico":
@@ -811,6 +814,7 @@ class Handler(SimpleHTTPRequestHandler):
         if path == "/favicon.ico":
             self.path = "/favicon.svg"
             return super().do_GET()
+
 
         if path.startswith("/api/"):
             try:

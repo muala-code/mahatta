@@ -7,7 +7,12 @@
   <meta name="color-scheme" content="light dark">
   <title>المحطة · أبيار الماشي</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="./styles.css?v=1.8.0">
+  <link rel="stylesheet" href="./styles.css?v=1.9.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+
+
+
+
 </head>
 <body>
   <div class="app-shell">
@@ -83,6 +88,7 @@
       <button class="tab active" data-tab="current" type="button" data-i18n="currentTab">الحالية</button>
       <button class="tab" data-tab="forecast" type="button" data-i18n="forecastTab">التوقعات</button>
       <button class="tab" data-tab="history" type="button" data-i18n="historyTab">التاريخ</button>
+      <button class="tab" data-tab="radar" type="button">الرادار</button>
       <button class="tab" data-tab="prayer" type="button" data-i18n="prayerTab">أوقات الصلاة</button>
     </nav>
 
@@ -109,7 +115,7 @@
             <span class="line-label" data-i18n="stationNow">المحطة الآن</span>
             <strong id="stationName">أبيار الماشي · المدينة</strong>
           </div>
-          <div id="observedAt" class="observed-at">آخر قراءة: —</div>
+          <div id="observedAt" class="observed-at">أحدث قراءة: —</div>
         </div>
 
         <div class="reading-list" aria-label="قراءات المحطة الحالية">
@@ -214,6 +220,33 @@
           </article>
         </div>
       </section>
+      <section id="panel-radar" class="panel radar-panel" data-panel="radar" hidden>
+        <div class="section-head">
+          <div>
+            <span class="eyebrow" data-radar-text="eyebrow">مشهد الطقس</span>
+            <div class="section-title-with-info">
+              <h1 data-radar-text="title">الرادار</h1>
+              <button class="info-button" type="button" data-source-info="radar" aria-label="مصدر بيانات الرادار">i</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="radar-layer-switch" role="group" aria-label="طبقة الخريطة">
+          <button class="radar-layer-button active" type="button" data-radar-layer="radar">الرادار</button>
+          <button class="radar-layer-button" type="button" data-radar-layer="clouds">السحب</button>
+          <button class="radar-layer-button" type="button" data-radar-layer="wind">الرياح</button>
+        </div>
+
+        <div class="weather-map" id="weatherMap">
+          <button id="radarFullscreenButton" class="radar-fullscreen-button" type="button" aria-label="ملء الشاشة" title="ملء الشاشة">⛶</button>
+          <div id="weatherLeafletMap" class="radar-native-map" aria-label="خريطة الطقس حول المحطة"></div>
+          <iframe id="radarWindyFrame" class="radar-windy-frame" title="خريطة السحب والرياح" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen hidden></iframe>
+          <div id="radarMapMessage" class="radar-map-message" hidden>جارٍ تحميل الرادار…</div>
+        </div>
+
+        <div class="radar-caption" data-radar-text="caption">الخريطة مركزة على موقع المحطة.</div>
+      </section>
+
 
       <section id="panel-prayer" class="panel" data-panel="prayer" hidden>
         <div class="section-head">
@@ -240,7 +273,10 @@
     <footer class="footer"><span data-i18n="brandTitle">المحطة</span></footer>
   </div>
 
-  <script src="./config.js?v=1.7.0"></script>
-  <script src="./app.js?v=1.8.0" defer></script>
+  <script src="./config.js?v=1.9.0"></script>
+  <script src="./app.js?v=1.9.0" defer></script>
+  <script src="./ui.js?v=1.9.0" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="./radar.js?v=1.9.0" defer></script>
 </body>
 </html>
