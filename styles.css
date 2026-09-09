@@ -2131,3 +2131,107 @@ html[data-theme="dark"] .current-hero > .current-main {
   inset-inline-start: auto !important;
   inset-inline-end: auto !important;
 }
+
+/* Mahatta v1.9 radar animation controls v2 */
+.station-map-marker {
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
+  border-width: 2px;
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+}
+.station-map-marker::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 50%;
+  animation: station-radar-pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes station-radar-pulse {
+  0% { transform: scale(.72); opacity: .85; }
+  75% { transform: scale(1.25); opacity: .12; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+.radar-playback-controls {
+  position: absolute;
+  z-index: 900;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 24px);
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .12);
+  direction: ltr;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+.radar-playback-controls[hidden] {
+  display: none !important;
+}
+.radar-tool-button {
+  width: 31px;
+  height: 31px;
+  min-width: 31px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.radar-tool-button:disabled {
+  opacity: .42;
+  cursor: default;
+}
+.radar-tool-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.radar-play-button {
+  color: var(--accent);
+  font-size: 15px;
+}
+.radar-control-time {
+  min-width: 78px;
+  padding-inline: 5px;
+  color: var(--text);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+}
+.weather-map:fullscreen .radar-playback-controls,
+.weather-map:-webkit-full-screen .radar-playback-controls,
+.weather-map.is-pseudo-fullscreen .radar-playback-controls {
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+}
+@media (max-width: 380px) {
+  .radar-playback-controls {
+    gap: 3px;
+    padding: 4px;
+  }
+  .radar-tool-button {
+    width: 29px;
+    height: 29px;
+    min-width: 29px;
+  }
+  .radar-control-time {
+    min-width: 70px;
+    padding-inline: 3px;
+    font-size: 9px;
+  }
+}
