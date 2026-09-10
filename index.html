@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="light dark">
   <title>المحطة · أبيار الماشي</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="./styles.css?v=1.9.1-radar-v2">
+  <link rel="stylesheet" href="./styles.css?v=1.9.3-forecast-portrait-1.8">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 
 
@@ -257,6 +257,7 @@
           <span class="section-source" data-i18n="ummAlQura">أم القرى</span>
         </div>
 
+        <div class="prayer-times-container">
         <div class="next-prayer-card">
           <span data-i18n="nextPrayer">الصلاة القادمة</span>
           <strong id="nextPrayerName">—</strong>
@@ -266,6 +267,32 @@
         <div id="prayerList" class="prayer-list">
           <div class="loading-box" data-i18n="loadingPrayer">جارٍ تحميل أوقات الصلاة…</div>
         </div>
+        </div>
+        <section id="moonInfo" class="moon-info" aria-label="Moon information">
+          <div class="moon-section-head">
+            <span id="moonSectionTitle">Moon</span>
+          </div>
+          <div class="moon-phase-card">
+            <div id="moonPhaseIcon" class="moon-phase-icon" aria-hidden="true">&#127761;</div>
+            <div class="moon-phase-copy">
+              <span id="moonPhaseTitle" class="moon-card-label">Moon phase</span>
+              <strong id="moonPhaseName" class="moon-phase-name">--</strong>
+            </div>
+          </div>
+
+          <div class="moon-times-grid">
+            <div class="moon-time-card">
+              <span class="moon-time-icon" aria-hidden="true">&#9790;&#8593;</span>
+              <span id="moonRiseLabel" class="moon-card-label">Moonrise</span>
+              <strong id="moonRiseTime" class="moon-time-value">--</strong>
+            </div>
+            <div class="moon-time-card">
+              <span class="moon-time-icon" aria-hidden="true">&#9790;&#8595;</span>
+              <span id="moonSetLabel" class="moon-card-label">Moonset</span>
+              <strong id="moonSetTime" class="moon-time-value">--</strong>
+            </div>
+          </div>
+        </section>
         <div id="hijriDate" class="hijri-date"></div>
       </section>
     </main>
@@ -274,7 +301,7 @@
   </div>
 
   <script src="./config.js?v=1.9.1"></script>
-  <script src="./app.js?v=1.9.0" defer></script>
+  <script src="./app.js?v=1.9.3-moon-ui" defer></script>
   <script src="./ui.js?v=1.9.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
   <script src="./radar.js?v=1.9.1-radar-v2" defer></script>

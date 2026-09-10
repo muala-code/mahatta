@@ -279,6 +279,30 @@
     }
   }
 
+  function gregorianDateLabel(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+
+    try {
+      const parts = new Intl.DateTimeFormat("en-GB-u-ca-gregory", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        timeZone: "Asia/Riyadh"
+      }).formatToParts(d);
+
+      const get = type => parts.find(part => part.type === type)?.value || "";
+      const day = get("day");
+      const month = get("month");
+      const year = get("year");
+      return day && month && year ? `${day}-${month}-${year}` : "";
+    } catch {
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      return `${day}-${month}-${d.getFullYear()}`;
+    }
+  }
   function renderForecast(data) {
     const box = $("forecastList");
     if (!data?.enabled || !Array.isArray(data.days) || !data.days.length) {
@@ -292,7 +316,10 @@
       const rainClass = precip !== null && precip > 10 ? " is-notable" : "";
       return `
         <div class="forecast-day">
-          <div class="forecast-name">${dayName}</div>
+          <div class="forecast-heading">
+            <div class="forecast-name">${dayName}</div>
+            <div class="forecast-date">${gregorianDateLabel(item.validTime)}</div>
+          </div>
           <div class="forecast-icon">${forecastIcon(item.phrase)}</div>
           <div class="forecast-text">
             <div class="forecast-phrase">${item.phrase || "—"}</div>
@@ -765,6 +792,56 @@
     }
   }
 
+  function moonUiText(key) {
+    const ar = {
+      phase: "\u0645\u0631\u062D\u0644\u0629 \u0627\u0644\u0642\u0645\u0631",
+      rise: "\u0634\u0631\u0648\u0642 \u0627\u0644\u0642\u0645\u0631",
+      set: "\u063A\u0631\u0648\u0628 \u0627\u0644\u0642\u0645\u0631"
+    };
+    const en = {
+      phase: "Moon phase",
+      rise: "Moonrise",
+      set: "Moonset"
+    };
+    return (settings.language === "en" ? en : ar)[key] || key;
+  }
+
+  function moonPhaseInfo(date = new Date()) {
+    const synodicMonth = 29.530588853;
+    const referenceNewMoon = Date.UTC(2000, 0, 6, 18, 14, 0);
+    let age = ((date.getTime() - referenceNewMoon) / 86400000) % synodicMonth;
+    if (age < 0) age += synodicMonth;
+
+    const index = Math.floor((age / synodicMonth) * 8 + 0.5) % 8;
+    const icons = ["\uD83C\uDF11", "\uD83C\uDF12", "\uD83C\uDF13", "\uD83C\uDF14", "\uD83C\uDF15", "\uD83C\uDF16", "\uD83C\uDF17", "\uD83C\uDF18"];
+
+    const ar = [
+      "\u0645\u062D\u0627\u0642",
+      "\u0647\u0644\u0627\u0644 \u0645\u062A\u0632\u0627\u064A\u062F",
+      "\u0627\u0644\u062A\u0631\u0628\u064A\u0639 \u0627\u0644\u0623\u0648\u0644",
+      "\u0623\u062D\u062F\u0628 \u0645\u062A\u0632\u0627\u064A\u062F",
+      "\u0628\u062F\u0631",
+      "\u0623\u062D\u062F\u0628 \u0645\u062A\u0646\u0627\u0642\u0635",
+      "\u0627\u0644\u062A\u0631\u0628\u064A\u0639 \u0627\u0644\u0623\u062E\u064A\u0631",
+      "\u0647\u0644\u0627\u0644 \u0645\u062A\u0646\u0627\u0642\u0635"
+    ];
+
+    const en = [
+      "New moon",
+      "Waxing crescent",
+      "First quarter",
+      "Waxing gibbous",
+      "Full moon",
+      "Waning gibbous",
+      "Last quarter",
+      "Waning crescent"
+    ];
+
+    return {
+      icon: icons[index],
+      name: (settings.language === "en" ? en : ar)[index]
+    };
+  }
   function renderPrayer(data) {
     const list = $("prayerList");
     if (!data?.enabled || !data.times) {
@@ -780,6 +857,22 @@
     $("hijriDate").textContent = data.hijriDate ? `${t("hijri")}: ${data.hijriDate}` : "";
     $("nextPrayerName").textContent = names[data.next] || "—";
     $("nextPrayerTime").textContent = data.next ? (data.times[data.next] || "—") : "—";
+    const moonPhase = moonPhaseInfo(new Date());
+    const moonPhaseIcon = $("moonPhaseIcon");
+    const moonPhaseTitle = $("moonPhaseTitle");
+    const moonPhaseName = $("moonPhaseName");
+    const moonRiseLabel = $("moonRiseLabel");
+    const moonSetLabel = $("moonSetLabel");
+    const moonRiseTime = $("moonRiseTime");
+    const moonSetTime = $("moonSetTime");
+
+    if (moonPhaseIcon) moonPhaseIcon.textContent = moonPhase.icon;
+    if (moonPhaseTitle) moonPhaseTitle.textContent = moonUiText("phase");
+    if (moonPhaseName) moonPhaseName.textContent = moonPhase.name;
+    if (moonRiseLabel) moonRiseLabel.textContent = moonUiText("rise");
+    if (moonSetLabel) moonSetLabel.textContent = moonUiText("set");
+    if (moonRiseTime) moonRiseTime.textContent = data.moon?.rise || "\u2014";
+    if (moonSetTime) moonSetTime.textContent = data.moon?.set || "\u2014";
   }
 
   async function loadPrayer(force = false) {
