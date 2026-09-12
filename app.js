@@ -29,6 +29,11 @@
   const longHistoryLoaded = { month: false, year: false };
   const longHistoryCache = { month: null, year: null };
   let historyPeriod = "day";
+  const HISTORY_START_YEAR = 2026;
+  const HISTORY_START_MONTH = 6;
+  let historyMonthCursor = null;
+  let historyYearCursor = null;
+  let longHistoryRequestId = 0;
 
   const translations = {
     ar: {
@@ -37,13 +42,13 @@
       appearance: "المظهر", light: "فاتح", dark: "داكن", language: "اللغة",
       extraCharts: "شارتات إضافية", rainChart: "المطر", pressureChart: "الضغط الجوي",
       menuNote: "الطقس من Weather Underground · أوقات الصلاة حسب أم القرى",
-      currentTab: "الحالية", forecastTab: "التوقعات", historyTab: "التاريخ", prayerTab: "أوقات الصلاة",
+      currentTab: "الحالية", forecastTab: "التوقعات", historyTab: "التاريخ", radarTab: "الرادار", prayerTab: "أوقات الصلاة",
       max: "العظمى", min: "الصغرى", feels: "المحسوسة", stationNow: "المحطة الآن",
       humidity: "الرطوبة", windSpeed: "سرعة الرياح", windGust: "هبّات الرياح", windDirection: "اتجاه الرياح",
       pressure: "الضغط", rainToday: "مطر اليوم", dewPoint: "نقطة الندى", solar: "الإشعاع الشمسي", uv: "مؤشر UV",
       nearForecast: "التوقعات القريبة", fiveDays: "خمسة أيام", loadingForecast: "جارٍ تحميل التوقعات…",
-      todayMovement: "حركة اليوم", monthMovement: "الشهر الحالي", yearMovement: "السنة الحالية",
-      historyDay: "يومي", historyMonth: "شهري", historyYear: "سنوي", yearSummaryChart: "الحرارة والمطر",
+      todayMovement: "حركة اليوم", monthMovement: "السجل الشهري", yearMovement: "السجل السنوي", previousPeriod: "الفترة السابقة", nextPeriod: "الفترة التالية",
+      historyDay: "يومي", historyMonth: "شهري", historyYear: "سنوي", yearSummaryChart: "الحرارة والمطر", monthlyTempDewChart: "الحرارة ونقطة الندى", avgTemperature: "متوسط الحرارة",
       loadingHistory: "جارٍ تحميل سجل اليوم…", loadingMonthHistory: "جارٍ تحميل سجل الشهر…", loadingYearHistory: "جارٍ تحميل سجل السنة…", temperatureChart: "الحرارة",
       windChart: "الرياح والهبات", windShort: "الرياح", gustShort: "الهبات", ummAlQura: "أم القرى",
       nextPrayer: "الصلاة القادمة", loadingPrayer: "جارٍ تحميل أوقات الصلاة…",
@@ -59,13 +64,13 @@
       appearance: "Appearance", light: "Light", dark: "Dark", language: "Language",
       extraCharts: "Extra charts", rainChart: "Rain", pressureChart: "Pressure",
       menuNote: "Weather by Weather Underground · Prayer times by Umm Al-Qura",
-      currentTab: "Current", forecastTab: "Forecast", historyTab: "History", prayerTab: "Prayer times",
+      currentTab: "Current", forecastTab: "Forecast", historyTab: "History", radarTab: "Radar", prayerTab: "Prayer times",
       max: "High", min: "Low", feels: "Feels like", stationNow: "Station now",
       humidity: "Humidity", windSpeed: "Wind speed", windGust: "Wind gusts", windDirection: "Wind direction",
       pressure: "Pressure", rainToday: "Rain today", dewPoint: "Dew point", solar: "Solar radiation", uv: "UV index",
       nearForecast: "Near forecast", fiveDays: "Five days", loadingForecast: "Loading forecast…",
-      todayMovement: "Today", monthMovement: "Current month", yearMovement: "Current year",
-      historyDay: "Daily", historyMonth: "Monthly", historyYear: "Yearly", yearSummaryChart: "Temperature & rain",
+      todayMovement: "Today", monthMovement: "Monthly history", yearMovement: "Yearly history", previousPeriod: "Previous period", nextPeriod: "Next period",
+      historyDay: "Daily", historyMonth: "Monthly", historyYear: "Yearly", yearSummaryChart: "Temperature & rain", monthlyTempDewChart: "Temperature & dew point", avgTemperature: "Average temperature",
       loadingHistory: "Loading today's history…", loadingMonthHistory: "Loading this month…", loadingYearHistory: "Loading this year…", temperatureChart: "Temperature",
       windChart: "Wind & gusts", windShort: "Wind", gustShort: "Gusts", ummAlQura: "Umm Al-Qura",
       nextPrayer: "Next prayer", loadingPrayer: "Loading prayer times…",
@@ -688,6 +693,120 @@
     return { year: read("year"), month: read("month"), day: read("day") };
   }
 
+  function ensureHistoryCursors() {
+    const now = riyadhCalendarParts();
+    const startIndex = HISTORY_START_YEAR * 12 + (HISTORY_START_MONTH - 1);
+    const currentIndex = now.year * 12 + (now.month - 1);
+
+    if (!historyMonthCursor || !Number.isInteger(historyMonthCursor.year) || !Number.isInteger(historyMonthCursor.month)) {
+      historyMonthCursor = { year: now.year, month: now.month };
+    }
+    let monthIndex = historyMonthCursor.year * 12 + (historyMonthCursor.month - 1);
+    monthIndex = Math.max(startIndex, Math.min(currentIndex, monthIndex));
+    historyMonthCursor = {
+      year: Math.floor(monthIndex / 12),
+      month: (monthIndex % 12) + 1
+    };
+
+    if (!Number.isInteger(historyYearCursor)) historyYearCursor = now.year;
+    historyYearCursor = Math.max(HISTORY_START_YEAR, Math.min(now.year, historyYearCursor));
+  }
+
+  function historySelection(period = historyPeriod) {
+    ensureHistoryCursors();
+    return period === "month"
+      ? { year: historyMonthCursor.year, month: historyMonthCursor.month }
+      : { year: historyYearCursor };
+  }
+
+  function historyDataMatchesSelection(data, period = historyPeriod) {
+    if (!data) return false;
+    const selected = historySelection(period);
+    if (Number(data.year) !== Number(selected.year)) return false;
+    return period !== "month" || Number(data.month) === Number(selected.month);
+  }
+
+  function historyRequestPath(period = historyPeriod) {
+    const selected = historySelection(period);
+    if (period === "month") {
+      return `/api/history/month?year=${encodeURIComponent(selected.year)}&month=${encodeURIComponent(selected.month)}`;
+    }
+    return `/api/history/year?year=${encodeURIComponent(selected.year)}`;
+  }
+
+  function historySelectionTitle(period = historyPeriod, data = null) {
+    const selected = historySelection(period);
+    if (period === "month") {
+      const year = Number(data?.year) || selected.year;
+      const month = Number(data?.month) || selected.month;
+      return monthTitle(year, month);
+    }
+    return String(Number(data?.year) || selected.year);
+  }
+
+  function updateHistoryNavigator(data = null) {
+    const navigator = $("historyPeriodNavigator");
+    if (!navigator) return;
+    const isLong = historyPeriod === "month" || historyPeriod === "year";
+    navigator.hidden = !isLong;
+    if (!isLong) return;
+
+    ensureHistoryCursors();
+    const now = riyadhCalendarParts();
+    const previous = $("historyPrevPeriod");
+    const next = $("historyNextPeriod");
+    const label = $("historyNavLabel");
+    if (label) label.textContent = historySelectionTitle(historyPeriod, data);
+
+    let atStart = false;
+    let atEnd = false;
+    if (historyPeriod === "month") {
+      const currentIndex = now.year * 12 + (now.month - 1);
+      const startIndex = HISTORY_START_YEAR * 12 + (HISTORY_START_MONTH - 1);
+      const selectedIndex = historyMonthCursor.year * 12 + (historyMonthCursor.month - 1);
+      atStart = selectedIndex <= startIndex;
+      atEnd = selectedIndex >= currentIndex;
+    } else {
+      atStart = historyYearCursor <= HISTORY_START_YEAR;
+      atEnd = historyYearCursor >= now.year;
+    }
+
+    if (previous) {
+      previous.disabled = atStart;
+      previous.setAttribute("aria-label", t("previousPeriod"));
+      previous.title = t("previousPeriod");
+    }
+    if (next) {
+      next.disabled = atEnd;
+      next.setAttribute("aria-label", t("nextPeriod"));
+      next.title = t("nextPeriod");
+    }
+  }
+
+  function shiftHistorySelection(delta) {
+    if (historyPeriod !== "month" && historyPeriod !== "year") return;
+    ensureHistoryCursors();
+    const now = riyadhCalendarParts();
+
+    if (historyPeriod === "month") {
+      const startIndex = HISTORY_START_YEAR * 12 + (HISTORY_START_MONTH - 1);
+      const currentIndex = now.year * 12 + (now.month - 1);
+      let selectedIndex = historyMonthCursor.year * 12 + (historyMonthCursor.month - 1);
+      selectedIndex = Math.max(startIndex, Math.min(currentIndex, selectedIndex + delta));
+      historyMonthCursor = {
+        year: Math.floor(selectedIndex / 12),
+        month: (selectedIndex % 12) + 1
+      };
+    } else {
+      historyYearCursor = Math.max(HISTORY_START_YEAR, Math.min(now.year, historyYearCursor + delta));
+    }
+
+    longHistoryLoaded[historyPeriod] = false;
+    longHistoryCache[historyPeriod] = null;
+    updateHistoryNavigator();
+    loadHistory(true);
+  }
+
   function reconcileCurrentMonthDay(points, data, period) {
     if (period !== "month" || !Array.isArray(points) || !cache.current) return points;
     const today = riyadhCalendarParts();
@@ -714,6 +833,8 @@
       label: period === "year" ? monthShort(point.month) : String(point.day ?? ""),
       tempHigh: convert("temp", point.tempHigh),
       tempLow: convert("temp", point.tempLow),
+      tempAvg: convert("temp", point.tempAvg),
+      dewPoint: convert("temp", point.dewPoint),
       rain: rainAllowed(point) ? Math.max(0, convert("rain", point.rain) ?? 0) : 0
     }));
     return reconcileCurrentMonthDay(points, data, period);
@@ -725,7 +846,9 @@
     dayCharts.hidden = true;
     monthCharts.hidden = true;
     yearCharts.hidden = true;
-    $("historyScopeLabel").textContent = t(period === "month" ? "monthMovement" : "yearMovement");
+    $("historyScopeLabel").textContent = t("historyTab");
+    $("historyDate").textContent = t(period === "month" ? "monthMovement" : "yearMovement");
+    updateHistoryNavigator(data);
     if (!data?.enabled || !Array.isArray(data.points) || !data.points.length) {
       message.hidden = false;
       message.textContent = data?.message || t("periodNoData");
@@ -733,24 +856,19 @@
     }
 
     const points = displayLongHistoryPoints(data, period);
-    $("historyDate").textContent = period === "month" ? monthTitle(data.year, data.month) : String(data.year || "");
     const totalRain = points.reduce((sum, point) => sum + (finiteNumber(point.rain) || 0), 0);
-    const tempRange = combinedRangeText(points, ["tempLow", "tempHigh"], unit("temp"));
+    const yearlyTempRange = combinedRangeText(points, ["tempLow", "tempHigh"], unit("temp"));
 
     if (period === "month") {
-      $("monthRainRange").textContent = `${number(totalRain, settings.units === "imperial" ? 2 : 1)}${unit("rain")}`;
-      $("monthTempRange").textContent = tempRange;
-      $("monthRainChart").innerHTML = svgCategoryBars(points, "rain", unit("rain"), {
-        axisDigits: settings.units === "imperial" ? 2 : 1,
-        zeroCeiling: settings.units === "imperial" ? 0.02 : 0.5
-      });
+      const monthlyRange = combinedRangeText(points, ["tempAvg", "dewPoint"], unit("temp"));
+      $("monthTempRange").textContent = monthlyRange;
       $("monthTempChart").innerHTML = svgCategoryLineChart(points, [
-        { key: "tempHigh", className: "temp-high-line" },
-        { key: "tempLow", className: "temp-low-line" }
+        { key: "tempAvg", className: "temp-avg-line" },
+        { key: "dewPoint", className: "dew-point-line" }
       ], unit("temp"));
       monthCharts.hidden = false;
     } else {
-      $("yearSummaryRange").textContent = `${number(totalRain, settings.units === "imperial" ? 2 : 1)}${unit("rain")} · ${tempRange}`;
+      $("yearSummaryRange").textContent = `${number(totalRain, settings.units === "imperial" ? 2 : 1)}${unit("rain")} · ${yearlyTempRange}`;
       $("yearSummaryChart").innerHTML = svgYearGroupedBars(points);
       yearCharts.hidden = false;
     }
@@ -759,7 +877,9 @@
 
   async function loadHistory(force = false) {
     setHistoryPeriodUI();
+    updateHistoryNavigator();
     if (historyPeriod === "day") {
+      longHistoryRequestId += 1;
       if (loaded.history && !force && cache.history) { renderHistory(cache.history); return; }
       const message = $("historyMessage"), charts = $("historyCharts");
       message.hidden = false; charts.hidden = true; $("historyMonthCharts").hidden = true; $("historyYearCharts").hidden = true;
@@ -775,23 +895,32 @@
       return;
     }
 
-    if (longHistoryLoaded[historyPeriod] && !force && longHistoryCache[historyPeriod]) {
-      renderLongHistory(longHistoryCache[historyPeriod], historyPeriod); return;
+    const selectedPeriod = historyPeriod;
+    if (longHistoryLoaded[selectedPeriod] && !force && longHistoryCache[selectedPeriod] && historyDataMatchesSelection(longHistoryCache[selectedPeriod], selectedPeriod)) {
+      renderLongHistory(longHistoryCache[selectedPeriod], selectedPeriod);
+      return;
     }
+
     const message = $("historyMessage"), charts = $("historyCharts");
     message.hidden = false; charts.hidden = true; $("historyMonthCharts").hidden = true; $("historyYearCharts").hidden = true;
     if (STATIC_PREVIEW) { message.textContent = t("dataConnected"); return; }
-    message.textContent = t(historyPeriod === "month" ? "loadingMonthHistory" : "loadingYearHistory");
+    message.textContent = t(selectedPeriod === "month" ? "loadingMonthHistory" : "loadingYearHistory");
+
+    const requestId = ++longHistoryRequestId;
+    const requestPath = historyRequestPath(selectedPeriod);
     try {
-      const data = await getJson(`/api/history/${historyPeriod}`);
-      longHistoryCache[historyPeriod] = data; longHistoryLoaded[historyPeriod] = true;
-      renderLongHistory(data, historyPeriod);
+      const data = await getJson(requestPath);
+      const selectionMatches = data?.enabled === false || historyDataMatchesSelection(data, selectedPeriod);
+      if (requestId !== longHistoryRequestId || historyPeriod !== selectedPeriod || !selectionMatches) return;
+      longHistoryCache[selectedPeriod] = data;
+      longHistoryLoaded[selectedPeriod] = true;
+      renderLongHistory(data, selectedPeriod);
     } catch (error) {
+      if (requestId !== longHistoryRequestId || historyPeriod !== selectedPeriod) return;
       console.error("Long history error", error);
       message.textContent = t("longHistoryUnavailable");
     }
   }
-
   function moonUiText(key) {
     const ar = {
       phase: "\u0645\u0631\u062D\u0644\u0629 \u0627\u0644\u0642\u0645\u0631",
@@ -932,7 +1061,7 @@
   }
 
   function applyAllSettings() {
-    applyTheme(); applyTranslations(); renderSettingButtons(); rerenderCached();
+    applyTheme(); applyTranslations(); renderSettingButtons(); rerenderCached(); updateHistoryNavigator();
   }
 
   document.querySelectorAll(".history-period-button").forEach(button => {
@@ -943,6 +1072,11 @@
       loadHistory(false);
     });
   });
+
+  const historyPrevPeriod = $("historyPrevPeriod");
+  const historyNextPeriod = $("historyNextPeriod");
+  if (historyPrevPeriod) historyPrevPeriod.addEventListener("click", () => shiftHistorySelection(-1));
+  if (historyNextPeriod) historyNextPeriod.addEventListener("click", () => shiftHistorySelection(1));
 
   tabs.forEach(tab => tab.addEventListener("click", () => activateTab(tab.dataset.tab)));
 

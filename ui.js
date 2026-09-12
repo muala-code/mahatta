@@ -612,7 +612,9 @@
 
   function syncRadarLanguage() {
     const tab = $('.tab[data-tab="radar"]');
-    if (tab) tab.textContent = text("radarTab");
+    const radarLabel = $('.tab[data-tab="radar"] .tab-label');
+    if (radarLabel) radarLabel.textContent = text("radarTab");
+    else if (tab) tab.textContent = text("radarTab");
     $$('[data-radar-text]').forEach(el => {
       const key = el.dataset.radarText;
       if (copy[lang()][key]) el.textContent = text(key);
@@ -682,4 +684,61 @@
       if (noteAnchor) placeNote(noteAnchor);
     }, { passive: true });
   });
+})();
+
+
+// ===== v1.9.4e tab tooltips =====
+(() => {
+  const tabs = [...document.querySelectorAll('.tab[data-tab]')];
+  if (!tabs.length) return;
+
+  const syncTabTooltip = (tab) => {
+    const label = tab.querySelector('.tab-label');
+    const text = (label?.textContent || tab.dataset.tooltip || '').trim();
+    if (!text) return;
+    tab.dataset.tooltip = text;
+    tab.setAttribute('aria-label', text);
+    tab.setAttribute('title', text);
+  };
+
+  const closeTip = (tab, delay = 0) => {
+    window.setTimeout(() => tab.classList.remove('tooltip-open'), delay);
+  };
+
+  tabs.forEach((tab) => {
+    syncTabTooltip(tab);
+    const label = tab.querySelector('.tab-label');
+    if (label) new MutationObserver(() => syncTabTooltip(tab)).observe(label, { childList: true, subtree: true, characterData: true });
+
+    let timer = 0;
+    const cancelTimer = () => { if (timer) { clearTimeout(timer); timer = 0; } };
+
+    tab.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') return;
+      cancelTimer();
+      delete tab.dataset.tooltipHeld;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        tab.dataset.tooltipHeld = '1';
+        tab.classList.add('tooltip-open');
+      }, 520);
+    }, { passive: true });
+
+    tab.addEventListener('pointerup', () => {
+      cancelTimer();
+      if (tab.dataset.tooltipHeld === '1') closeTip(tab, 900);
+    }, { passive: true });
+    tab.addEventListener('pointercancel', () => { cancelTimer(); closeTip(tab); }, { passive: true });
+    tab.addEventListener('pointerleave', (event) => {
+      if (event.pointerType !== 'mouse') cancelTimer();
+    }, { passive: true });
+  });
+
+  document.addEventListener('click', (event) => {
+    const tab = event.target.closest?.('.tab[data-tooltip-held="1"]');
+    if (!tab) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    delete tab.dataset.tooltipHeld;
+  }, true);
 })();

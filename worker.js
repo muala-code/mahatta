@@ -1007,14 +1007,36 @@ async function apiHistoryToday() {
 }
 
 
+function historicalDewPoint(tempC, humidity) {
+  const t = finite(tempC);
+  const rh = finite(humidity);
+  if (t === null || rh === null || rh <= 0 || rh > 100) return null;
+  const a = 17.62;
+  const b = 243.12;
+  const gamma = Math.log(rh / 100) + (a * t) / (b + t);
+  const dew = (b * gamma) / (a - gamma);
+  return Number.isFinite(dew) ? dew : null;
+}
+
 function dailyHistoryPoint(row) {
   const stamp = String(row?.obsTimeLocal || row?.obsTimeUtc || '');
   const date = stamp.slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const high = firstFinite(historyMetric(row, 'tempHigh'), historyMetric(row, 'tempAvg'));
   const low = firstFinite(historyMetric(row, 'tempLow'), historyMetric(row, 'tempAvg'));
+  const tempAvg = firstFinite(
+    historyMetric(row, 'tempAvg', 'temp'),
+    high !== null && low !== null ? (high + low) / 2 : null
+  );
+  const humidityAvg = pickHistoryHumidity(row);
+  const dewPoint = firstFinite(
+    historyMetric(row, 'dewptAvg', 'dewPointAvg', 'dewpt', 'dewPoint'),
+    row?.dewptAvg,
+    row?.dewPointAvg,
+    historicalDewPoint(tempAvg, humidityAvg)
+  );
   const rain = Math.max(0, firstFinite(historyMetric(row, 'precipTotal'), row?.precipTotal, 0) || 0);
-  return { date, tempHigh: high, tempLow: low, rain };
+  return { date, tempHigh: high, tempLow: low, tempAvg, dewPoint, rain };
 }
 
 function daysInMonth(year, month) {
@@ -1037,18 +1059,39 @@ async function loadDailyPeriod(year, month, endDay) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+function dayAverageTempDew(hourly, iso) {
+  const temps = [];
+  const dews = [];
+  for (const row of historyRows(hourly)) {
+    const stamp = String(row?.obsTimeLocal || row?.obsTimeUtc || '');
+    if (!stamp.startsWith(iso)) continue;
+    const temp = pickHistoryTemp(row);
+    const dew = firstFinite(
+      historyMetric(row, 'dewptAvg', 'dewpt', 'dewPoint'),
+      pickDew(row),
+      historicalDewPoint(temp, pickHistoryHumidity(row))
+    );
+    if (temp !== null) temps.push(temp);
+    if (dew !== null) dews.push(dew);
+  }
+  const average = values => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  return { tempAvg: average(temps), dewPoint: average(dews) };
+}
+
 async function correctCurrentDayDaily(points, now) {
   const iso = `${now.year}-${String(now.month).padStart(2, '0')}-${String(now.day).padStart(2, '0')}`;
   const point = points.find(p => p.date === iso);
   if (!point) return points;
   const high = finite(point.tempHigh);
   const low = finite(point.tempLow);
-  if (high !== null && high !== 0 && low !== null && low !== 0) return points;
   try {
     const hourly = await loadDayHourly(dateKeyParts(now.year, now.month, now.day));
     const fb = dayMinMax(hourly, iso);
+    const avg = dayAverageTempDew(hourly, iso);
     if ((low === null || low === 0) && fb.min !== null) point.tempLow = fb.min;
     if ((high === null || high === 0) && fb.max !== null) point.tempHigh = fb.max;
+    if (avg.tempAvg !== null) point.tempAvg = avg.tempAvg;
+    if (avg.dewPoint !== null) point.dewPoint = avg.dewPoint;
   } catch {}
   return points;
 }

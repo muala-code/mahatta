@@ -3303,3 +3303,263 @@ html[data-text-size] #panel-forecast .forecast-phrase {
     line-height: 1.45 !important;
   }
 }
+
+/* ===== v1.9.4d usability pass ===== */
+.sticky-app-head {
+  position: sticky;
+  top: 0;
+  z-index: 1500;
+  background: color-mix(in srgb, var(--page) 96%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 86%, transparent);
+  box-shadow: 0 5px 14px rgba(30, 51, 42, .035);
+}
+.sticky-app-head .topbar { position: relative; z-index: 2; background: transparent; }
+.sticky-app-head .tabs {
+  position: static !important;
+  z-index: 1;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 5px;
+  padding: 5px 12px 9px;
+  margin: 0 !important;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.menu-panel { z-index: 1700 !important; }
+.tab {
+  position: relative;
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+  justify-self: center;
+  display: grid; place-items: center;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--line) 94%, var(--text) 6%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-soft) 88%, var(--surface) 12%);
+  color: var(--muted);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 92%, transparent), 0 3px 7px rgba(29, 41, 36, .09);
+  transition: transform .14s ease, color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+.tab:hover { color: color-mix(in srgb, var(--text) 72%, var(--muted) 28%); }
+.tab.active {
+  color: var(--accent);
+  background: var(--surface);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 96%, transparent), 0 5px 11px color-mix(in srgb, var(--accent) 15%, transparent), 0 2px 5px rgba(29, 41, 36, .08);
+}
+.tab:active { transform: translateY(1px); }
+.tab-icon { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.tab-icon .tab-icon-fill { fill: currentColor; stroke: none; }
+.tab-label { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+
+body, button, input, label { font-weight: 600; }
+.brand-title, .temperature { font-weight: 800; }
+.section-head h1, .section-title-with-info h1, strong, b, .forecast-name, .line-label, .eyebrow, .menu-title { font-weight: 700; }
+html[data-text-size="small"]  { --v194-step: 1px; --v194-title-step: .25px; }
+html[data-text-size="medium"] { --v194-step: 2.5px; --v194-title-step: .75px; }
+html[data-text-size="large"]  { --v194-step: 4px; --v194-title-step: 1.25px; }
+html[lang="ar"] { --v194-lang-boost: .5px; }
+html[lang="en"] { --v194-lang-boost: 0px; }
+html[data-text-size] .brand-title { font-size: calc(18px + var(--v194-title-step)) !important; }
+html[data-text-size] .brand-subtitle, html[data-text-size] .status-pill, html[data-text-size] .hero-details span, html[data-text-size] .hijri-date { font-size: calc(11px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 600 !important; }
+html[data-text-size] .condition-label, html[data-text-size] .reading-row span, html[data-text-size] .loading-box { font-size: calc(12px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 600 !important; }
+html[data-text-size] .reading-row strong, html[data-text-size] .station-line strong, html[data-text-size] .forecast-name, html[data-text-size] .forecast-temps, html[data-text-size] .prayer-name { font-size: calc(13px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 700 !important; }
+html[data-text-size] .observed-at, html[data-text-size] .section-source, html[data-text-size] .footer, html[data-text-size] .line-label, html[data-text-size] .eyebrow, html[data-text-size] .forecast-rain, html[data-text-size] .radar-caption, html[data-text-size] .menu-panel .menu-title { font-size: calc(10px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 600 !important; }
+html[data-text-size] .forecast-phrase, html[data-text-size] .menu-panel .menu-action, html[data-text-size] .menu-panel .menu-check, html[data-text-size] .menu-panel .setting-option, html[data-text-size] .radar-layer-button { font-size: calc(11px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 600 !important; }
+html[data-text-size] .history-period-button { font-size: calc(9.5px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 700 !important; }
+html[data-text-size] .hero-details strong { font-size: calc(14px + var(--v194-step)) !important; }
+html[data-text-size] .section-head h1, html[data-text-size] .section-title-with-info h1 { font-size: calc(17px + var(--v194-title-step) + var(--v194-lang-boost)) !important; font-weight: 700 !important; }
+html[data-text-size] .next-prayer-card span { font-size: calc(10px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 600 !important; }
+html[data-text-size] .next-prayer-card strong { font-size: calc(16px + var(--v194-title-step) + var(--v194-lang-boost)) !important; font-weight: 700 !important; }
+html[data-text-size] .next-prayer-card b { font-size: calc(22px + var(--v194-title-step)) !important; font-weight: 800 !important; }
+html[data-text-size] .moon-card-label { font-size: calc(10px + var(--v194-step) + var(--v194-lang-boost)) !important; font-weight: 600 !important; }
+html[data-text-size] .moon-phase-name, html[data-text-size] .moon-time-value { font-weight: 700 !important; }
+
+/* Chart font sizes and line widths intentionally stay unchanged. */
+html[data-text-size] .chart-axis-text { font-size: 7.5px !important; font-weight: 600 !important; }
+html[data-text-size] .chart-head strong { font-size: 12px !important; font-weight: 700 !important; }
+html[data-text-size] .chart-head span { font-size: 9px !important; font-weight: 600 !important; }
+html[data-text-size] .chart-legend { font-size: 9px !important; font-weight: 600 !important; }
+.temp-avg-line { stroke: #a8614d; }
+.dew-point-line { stroke: #47745d; }
+.legend-line.temp-avg-line { border-color: #a8614d; }
+.legend-line.dew-point-line { border-color: #47745d; }
+@media (max-width: 360px) {
+  .sticky-app-head .tabs { padding-inline: 8px; gap: 3px; }
+  .tab { width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 11px; }
+  .tab-icon { width: 20px; height: 20px; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .sticky-app-head .topbar { padding-top: 8px; padding-bottom: 5px; }
+  .sticky-app-head .tabs { padding-top: 3px; padding-bottom: 6px; }
+  .tab { width: 38px; height: 38px; min-width: 38px; min-height: 38px; }
+  .tab-icon { width: 19px; height: 19px; }
+}
+
+
+/* ===== v1.9.4e recessed tabs + tooltips ===== */
+.sticky-app-head .tabs {
+  background: color-mix(in srgb, var(--surface-soft) 56%, var(--page) 44%) !important;
+  border-top: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--surface) 72%, transparent),
+    inset 0 -2px 5px rgba(29, 41, 36, .035);
+}
+
+.tab {
+  transform: none !important;
+  background: color-mix(in srgb, var(--page) 58%, var(--surface-soft) 42%) !important;
+  border-color: color-mix(in srgb, var(--line) 82%, var(--text) 8%) !important;
+  box-shadow:
+    inset 0 2px 5px rgba(29, 41, 36, .085),
+    inset 0 -1px 0 color-mix(in srgb, var(--surface) 88%, transparent) !important;
+}
+.tab:hover {
+  color: color-mix(in srgb, var(--text) 76%, var(--muted) 24%);
+  transform: none !important;
+}
+.tab.active {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent-soft) 32%, var(--page) 68%) !important;
+  transform: none !important;
+  box-shadow:
+    inset 0 3px 7px rgba(29, 41, 36, .12),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--surface) 78%, transparent) !important;
+}
+.tab:active {
+  transform: none !important;
+  box-shadow:
+    inset 0 4px 8px rgba(29, 41, 36, .14),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent) !important;
+}
+
+.tab[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 1900;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translate(-50%, -3px);
+  min-width: max-content;
+  max-width: min(180px, calc(100vw - 24px));
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, var(--text) 8%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  color: var(--text);
+  box-shadow: 0 5px 14px rgba(20, 34, 28, .11);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tab[data-tooltip]:hover::after,
+  .tab[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+}
+.tab.tooltip-open::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+html[dir="rtl"] .tab[data-tooltip]::after { direction: rtl; }
+html[dir="ltr"] .tab[data-tooltip]::after { direction: ltr; }
+
+#panel-current .reading-row::before {
+  color: color-mix(in srgb, var(--accent) 72%, var(--muted) 28%) !important;
+  opacity: .44 !important;
+  font-weight: 800;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--surface) 82%, transparent);
+}
+#panel-current .reading-row:nth-child(9)::before { opacity: .5 !important; }
+html[data-theme="dark"] #panel-current .reading-row::before { opacity: .56 !important; }
+
+html[data-theme="dark"] .tab {
+  background: color-mix(in srgb, var(--surface-soft) 54%, var(--page) 46%) !important;
+  box-shadow:
+    inset 0 3px 7px rgba(0, 0, 0, .28),
+    inset 0 -1px 0 rgba(255, 255, 255, .035) !important;
+}
+html[data-theme="dark"] .tab.active {
+  background: color-mix(in srgb, var(--accent-soft) 28%, var(--page) 72%) !important;
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, .34),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent) !important;
+}
+
+
+/* ===== v1.9.4f history period navigation ===== */
+.history-period-navigator {
+  direction: ltr;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-soft) 62%, var(--surface) 38%);
+  box-shadow: inset 0 1px 2px rgba(29, 41, 36, .045);
+}
+.history-nav-label {
+  min-width: 0;
+  text-align: center;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[dir="rtl"] .history-nav-label { direction: rtl; }
+html[dir="ltr"] .history-nav-label { direction: ltr; }
+.history-nav-button {
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--line) 90%, var(--text) 7%);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--page) 58%, var(--surface-soft) 42%);
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: inset 0 2px 4px rgba(29, 41, 36, .07), inset 0 -1px 0 color-mix(in srgb, var(--surface) 86%, transparent);
+  cursor: pointer;
+}
+.history-nav-button:active:not(:disabled) { box-shadow: inset 0 3px 6px rgba(29, 41, 36, .13); }
+.history-nav-button:disabled {
+  color: var(--muted);
+  opacity: .32;
+  cursor: default;
+}
+html[data-theme="dark"] .history-period-navigator {
+  background: color-mix(in srgb, var(--surface-soft) 56%, var(--page) 44%);
+}
+html[data-theme="dark"] .history-nav-button {
+  background: color-mix(in srgb, var(--surface-soft) 52%, var(--page) 48%);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, .22), inset 0 -1px 0 rgba(255,255,255,.035);
+}
+html[data-text-size] .history-nav-label {
+  font-size: calc(11px + var(--v194-step) + var(--v194-lang-boost)) !important;
+  font-weight: 700 !important;
+}
+@media (max-width: 360px) {
+  .history-period-navigator { grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 6px; padding-inline: 6px; }
+  .history-nav-button { width: 34px; height: 32px; }
+}
